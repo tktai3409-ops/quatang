@@ -1,0 +1,2401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Món Quà Dành Riêng Cho Em ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thư viện tạo mã QR thật có thể quét bằng điện thoại -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <!-- Google Fonts: Quicksand & Dancing Script giống 100% ảnh mẫu -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- =========================================================================
+         [FILE NHỎ 1/5]: style.css - TOÀN BỘ GIAO DIỆN & HIỆU ỨNG CHUYỂN ĐỘNG
+         Bạn có thể chỉnh sửa màu nền hồng (#fbe4e6), font chữ và hiệu ứng tại đây
+    ========================================================================== -->
+    <style id="file-style-css">
+        :root {
+            --bg-pink: #fbe4e6;
+            --text-rose: #a65959;
+            --bouquet-outline: #8c4a4e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-pink);
+        }
+
+        /* ----- PHÂN CẢNH 1: MÀN HÌNH BÓ HOA & MÃ QR (Giống 100% ảnh mẫu) ----- */
+        #scene-bouquet {
+            position: fixed;
+            inset: 0;
+            background-color: var(--bg-pink);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #scene-bouquet.fade-out {
+            opacity: 0;
+            transform: scale(1.12);
+            pointer-events: none;
+        }
+
+        /* Hiệu ứng đung đưa nhẹ tự nhiên cho bó hoa */
+        .bouquet-wrapper {
+            position: relative;
+            width: 230px;
+            height: 270px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatBouquet 3.6s ease-in-out infinite;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .bouquet-wrapper:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 12px 24px rgba(186, 85, 96, 0.22));
+        }
+
+        .bouquet-wrapper:active {
+            transform: scale(0.96);
+        }
+
+        @keyframes floatBouquet {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1.2deg); }
+        }
+
+        /* Khung chứa mã QR nằm gọn trong tâm bó hoa */
+        .qr-in-bouquet {
+            position: absolute;
+            top: 39%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 68px;
+            height: 68px;
+            background: rgba(255, 245, 246, 0.92);
+            border: 1.5px solid #c96973;
+            border-radius: 10px;
+            padding: 4px;
+            box-shadow: 0 4px 12px rgba(140, 60, 70, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 5;
+        }
+
+        /* Khi rê chuột hoặc bật chế độ quét rõ, mã QR phóng nhẹ để điện thoại khác quét dễ dàng */
+        .bouquet-wrapper:hover .qr-in-bouquet,
+        .qr-in-bouquet.zoom-qr {
+            width: 128px;
+            height: 128px;
+            background: #ffffff;
+            box-shadow: 0 10px 28px rgba(140, 50, 65, 0.35);
+            z-index: 20;
+        }
+
+        .qr-in-bouquet canvas,
+        .qr-in-bouquet img,
+        .qr-in-bouquet svg {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            border-radius: 5px;
+        }
+
+        /* Dòng chữ "Chạm vào bó hoa" giống 100% ảnh gốc */
+        .touch-bouquet-text {
+            margin-top: 34px;
+            color: var(--text-rose);
+            font-size: 27px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-align: center;
+            cursor: pointer;
+            animation: pulseSoft 2.4s ease-in-out infinite;
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 0.92; transform: scale(1); }
+            50% { opacity: 0.65; transform: scale(0.98); }
+        }
+
+        /* ----- PHÂN CẢNH 2: KHUNG HÌNH NẰM NGANG DÀI RA + VŨ TRỤ TRÁI TIM & TRỤC NẰM DỌC ----- */
+        #scene-heart {
+            position: fixed;
+            inset: 0;
+            background-color: #020205;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #scene-heart.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Khung hình nằm ngang kéo dài (Wide Horizontal Cinema Frame) giống màn hình trong video */
+        .widescreen-stage {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-height: 60vw; /* Khung hình nằm ngang rộng rãi để Trái Tim & Trục xoay hiển thị to rõ */
+            min-height: 340px;
+            background: #000000;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Chế độ xoay ngang toàn màn hình cho điện thoại nếu người dùng muốn phóng cực đại */
+        .widescreen-stage.force-landscape-mobile {
+            width: 100vh !important;
+            height: 100vw !important;
+            max-height: none !important;
+            transform: rotate(90deg);
+            transform-origin: center center;
+            border: none;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+        }
+
+        /* ----- KHUNG LỜI BÀI HÁT Ở DƯỚI CÙNG MÀN HÌNH, NHỎ GỌN & HIỆN NGAY TỪ BÓ HOA ----- */
+        .lyrics-container {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 440px;
+            text-align: center;
+            z-index: 42; /* Nằm trên cả Phân cảnh 1 (Bó hoa) và Phân cảnh 2 (Trái tim) */
+            pointer-events: none;
+            padding: 4px 12px;
+            border-radius: 999px;
+            transition: all 0.45s ease;
+        }
+
+        /* Giao diện lời bài hát khi đang ở Phân cảnh 1 (Màn hình Bó Hoa nền hồng) */
+        .lyrics-container.theme-bouquet .lyric-line-main {
+            font-size: 12px;
+            font-weight: 700;
+            color: #8c4347;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.3px;
+            line-height: 1.3;
+        }
+
+        .lyrics-container.theme-bouquet .lyric-line-sub {
+            margin-top: 1px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: rgba(140, 67, 71, 0.62);
+            letter-spacing: 0.2px;
+            line-height: 1.2;
+        }
+
+        /* Giao diện lời bài hát khi sang Phân cảnh 2 (Màn hình Trái Tim nền đen) */
+        .lyrics-container.theme-heart .lyric-line-main {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 8px var(--glow-color, #ff1744), 0 0 16px var(--glow-color, #ff1744);
+            letter-spacing: 0.35px;
+            line-height: 1.3;
+        }
+
+        .lyrics-container.theme-heart .lyric-line-sub {
+            margin-top: 1px;
+            font-size: 10.5px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.52);
+            letter-spacing: 0.2px;
+            line-height: 1.2;
+        }
+
+        .lyric-animate {
+            animation: lyricFadeUp 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes lyricFadeUp {
+            0% { opacity: 0; transform: translateY(5px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Gợi ý chạm vào vòng xoáy giống video lúc 00:00 - 00:03 (đặt cao hơn lời bài hát) */
+        .vortex-hint {
+            position: fixed;
+            bottom: 68px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            padding: 6px 15px;
+            border-radius: 999px;
+            z-index: 25;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            white-space: nowrap;
+        }
+
+        .vortex-hint.hidden-hint {
+            opacity: 0;
+            transform: translate(-50%, 10px);
+        }
+
+        /* Thanh công cụ nổi đặt ở góc trên bên phải để nhường chỗ cho lời bài hát ở đáy */
+        .floating-toolbar {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 45;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .tool-btn {
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .floating-toolbar.bouquet-toolbar .tool-btn {
+            background: rgba(166, 89, 89, 0.11);
+            border-color: rgba(166, 89, 89, 0.25);
+            color: #8c4343;
+            box-shadow: 0 2px 8px rgba(166, 89, 89, 0.08);
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 77, 148, 0.35);
+            border-color: rgba(255, 133, 179, 0.6);
+        }
+
+        /* Custom Scrollbar cho trình quản lý File nhỏ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 92, 147, 0.5); border-radius: 999px; }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================================
+         PHÂN CẢNH 1: NỀN HỒNG + BÓ HOA CÓ MÃ QR BÊN TRONG (GIỐNG 100% ẢNH MẪU)
+    ========================================================================== -->
+    <section id="scene-bouquet">
+        <!-- Bó hoa hồng vẽ vector chi tiết giống hệt ảnh gửi + tích hợp QR ở tâm -->
+        <div class="bouquet-wrapper" id="bouquet-trigger" title="Chạm vào bó hoa hoặc quét mã QR">
+            <svg viewBox="0 0 260 300" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Lớp giấy gói phía sau cùng (chóp nhọn trên đỉnh giống ảnh) -->
+                <path d="M130 18 L168 58 L92 58 Z" fill="#f5b0bc" stroke="#8c4a4e" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M55 72 L105 38 L130 65 L155 38 L205 72 L192 165 L68 165 Z" fill="#fbd2d7" stroke="#8c4a4e" stroke-width="2" stroke-linejoin="round"/>
+                
+                <!-- Lớp giấy lót màu hồng đậm hơn bên trong -->
+                <path d="M68 82 L108 55 L130 72 L152 55 L192 82 L178 160 L82 160 Z" fill="#f49ca9" stroke="#8c4a4e" stroke-width="1.8" stroke-linejoin="round"/>
+
+                <!-- Cành và lá xanh phía sau hoa -->
+                <g stroke="#557a46" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <!-- Lá bên trái -->
+                    <path d="M72 115 C52 102, 48 82, 68 85 C82 88, 86 105, 72 115 Z" fill="#78a665"/>
+                    <path d="M88 78 C75 60, 82 44, 98 54 C108 62, 102 76, 88 78 Z" fill="#85b572"/>
+                    <!-- Lá bên phải -->
+                    <path d="M188 115 C208 102, 212 82, 192 85 C178 88, 174 105, 188 115 Z" fill="#78a665"/>
+                    <path d="M172 78 C185 60, 178 44, 162 54 C152 62, 158 76, 172 78 Z" fill="#85b572"/>
+                    <!-- Lá xen kẽ ở giữa -->
+                    <path d="M128 66 C122 46, 138 46, 132 66 Z" fill="#6b9958"/>
+                    <path d="M62 132 C46 126, 48 112, 66 118" fill="#78a665"/>
+                    <path d="M198 132 C214 126, 212 112, 194 118" fill="#78a665"/>
+                </g>
+
+                <!-- Các bông hoa hồng đỏ cam / hồng đào bao quanh (Giống 100% bố cục bó hoa mẫu) -->
+                <!-- Bông hồng trên trái -->
+                <g transform="translate(86, 78)">
+                    <circle cx="0" cy="0" r="19" fill="#f0676e" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-10 -4 C-4 -12, 8 -10, 10 -2 C12 6, 2 12, -6 8 C-12 4, -8 -4, -2 -4 C4 -4, 4 2, 0 3" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+                <!-- Bông hồng trên phải -->
+                <g transform="translate(174, 80)">
+                    <circle cx="0" cy="0" r="18" fill="#ed5c64" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-9 -3 C-3 -11, 7 -9, 9 -1 C11 5, 2 11, -5 7 C-10 3, -7 -3, -1 -3 C3 -3, 3 2, 0 3" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+                <!-- Bông hồng đỉnh giữa -->
+                <g transform="translate(130, 68)">
+                    <circle cx="0" cy="0" r="20" fill="#f27279" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-11 -4 C-4 -13, 8 -11, 11 -2 C13 6, 3 12, -6 8 C-12 4, -8 -4, -2 -4 C4 -4, 4 2, 0 3" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+                <!-- Bông hồng rìa trái -->
+                <g transform="translate(72, 118)">
+                    <circle cx="0" cy="0" r="18" fill="#e8545c" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-8 -3 C-2 -10, 7 -8, 9 -1 C10 5, 2 10, -5 7 C-9 3, -6 -3, -1 -3" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+                <!-- Bông hồng rìa phải -->
+                <g transform="translate(188, 118)">
+                    <circle cx="0" cy="0" r="18" fill="#f26d75" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-8 -3 C-2 -10, 7 -8, 9 -1 C10 5, 2 10, -5 7 C-9 3, -6 -3, -1 -3" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+                <!-- Hai bông hồng đỡ phía dưới mã QR -->
+                <g transform="translate(96, 146)">
+                    <circle cx="0" cy="0" r="17" fill="#f0676e" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-8 -2 C-2 -9, 6 -7, 8 -1 C9 5, 2 9, -4 6" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+                <g transform="translate(164, 146)">
+                    <circle cx="0" cy="0" r="17" fill="#eb5760" stroke="#8c3b3f" stroke-width="1.8"/>
+                    <path d="M-8 -2 C-2 -9, 6 -7, 8 -1 C9 5, 2 9, -4 6" stroke="#8c3b3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                </g>
+
+                <!-- Hoa baby trắng & nụ vàng li ti điểm xuyết giống ảnh mẫu -->
+                <g fill="#ffffff" stroke="#8c4a4e" stroke-width="1">
+                    <circle cx="66" cy="95" r="3.5"/>
+                    <circle cx="105" cy="60" r="3"/>
+                    <circle cx="155" cy="58" r="3.5"/>
+                    <circle cx="195" cy="96" r="3"/>
+                    <circle cx="78" cy="142" r="3.2"/>
+                    <circle cx="182" cy="142" r="3.2"/>
+                    <circle cx="130" cy="156" r="3.5"/>
+                </g>
+                <g fill="#ffd166" stroke="#8c4a4e" stroke-width="1">
+                    <circle cx="110" cy="90" r="3"/>
+                    <circle cx="150" cy="90" r="3"/>
+                    <circle cx="60" cy="106" r="2.8"/>
+                    <circle cx="200" cy="106" r="2.8"/>
+                </g>
+
+                <!-- Lớp giấy gói gấp chéo phía trước ôm lấy bó hoa -->
+                <!-- Cánh giấy trái -->
+                <path d="M46 112 L88 158 L130 185 L108 212 L58 168 Z" fill="#FAD2D8" stroke="#8c4a4e" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Cánh giấy phải -->
+                <path d="M214 112 L172 158 L130 185 L152 212 L202 168 Z" fill="#FAD2D8" stroke="#8c4a4e" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Phễu giấy chính giữa ôm thân bó hoa -->
+                <path d="M72 152 C102 172, 158 172, 188 152 L152 218 L108 218 Z" fill="#f7bac4" stroke="#8c4a4e" stroke-width="2" stroke-linejoin="round"/>
+
+                <!-- Chân giấy gói xoè bên dưới nơ -->
+                <path d="M112 218 L96 272 L128 266 L130 274 L164 272 L148 218 Z" fill="#f9cbd3" stroke="#8c4a4e" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Cuống hoa xanh lấp ló ở đáy -->
+                <path d="M122 268 L118 282 M130 272 L130 285 M138 268 L142 282" stroke="#557a46" stroke-width="2.5" stroke-linecap="round"/>
+
+                <!-- Thẻ bài trái tim "Love" màu hồng phấn giống 100% ảnh gốc -->
+                <g transform="translate(130, 182)">
+                    <rect x="-24" y="-12" width="48" height="24" rx="6" fill="#ffeef0" stroke="#8c4a4e" stroke-width="1.6"/>
+                    <!-- Trái tim nhỏ bên trái chữ Love -->
+                    <path d="M-12 -1 C-14 -5, -19 -3, -16 2 L-12 6 L-8 2 C-5 -3, -10 -5, -12 -1 Z" fill="#f0676e"/>
+                    <text x="5" y="4" font-family="Dancing Script, cursive" font-size="13" font-weight="700" fill="#8c4a4e" text-anchor="middle">Love</text>
+                </g>
+
+                <!-- Chiếc nơ ruy băng hồng thắt ở eo bó hoa -->
+                <g transform="translate(130, 220)" stroke="#8c4a4e" stroke-width="1.8" stroke-linejoin="round">
+                    <!-- Hai dải ruy băng rủ xuống -->
+                    <path d="M-4 4 L-18 38 L-8 34 L0 8" fill="#f28b9b"/>
+                    <path d="M4 4 L18 38 L8 34 L0 8" fill="#f28b9b"/>
+                    <!-- Hai cánh nơ phồng -->
+                    <path d="M0 0 C-18 -14, -32 -4, -24 8 C-16 14, -4 6, 0 0 Z" fill="#f598a7"/>
+                    <path d="M0 0 C18 -14, 32 -4, 24 8 C16 14, 4 6, 0 0 Z" fill="#f598a7"/>
+                    <!-- Nút thắt giữa nơ -->
+                    <ellipse cx="0" cy="1" rx="6" ry="5" fill="#eb7a8c"/>
+                </g>
+            </svg>
+
+            <!-- MÃ QR THẬT NẰM TRONG BÓ HOA (Có thể chạm trực tiếp hoặc quét bằng điện thoại) -->
+            <div class="qr-in-bouquet" id="qr-bouquet-box" title="Chạm hoặc quét mã QR để mở trái tim">
+                <div id="bouquet-qr-render" class="w-full h-full flex items-center justify-center"></div>
+            </div>
+        </div>
+
+        <!-- Dòng chữ "Chạm vào bó hoa" chuẩn font và màu sắc từ ảnh mẫu -->
+        <h1 class="touch-bouquet-text" id="touch-text-trigger">Chạm vào bó hoa</h1>
+
+        <!-- Nút phụ nhỏ gọn giúp phóng to mã QR trong bó hoa nếu muốn đưa cho người yêu quét từ xa -->
+        <div class="mt-4 flex items-center gap-2.5">
+            <button id="btn-toggle-qr-zoom" class="text-[11px] font-semibold px-3 py-1 rounded-full bg-[#f3cfd3]/80 text-[#8c4a4e] hover:bg-[#eabbc1] transition shadow-sm flex items-center gap-1">
+                <span>🔍</span> <span id="qr-zoom-label">Phóng to QR</span>
+            </button>
+            <button id="btn-share-qr-modal" class="text-[11px] font-semibold px-3 py-1 rounded-full bg-[#f3cfd3]/80 text-[#8c4a4e] hover:bg-[#eabbc1] transition shadow-sm flex items-center gap-1">
+                <span>💌</span> <span>Mã QR Quà Tặng</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         PHÂN CẢNH 2: KHUNG HÌNH NẰM NGANG + TRÁI TIM & TRỤC XOAY NẰM DỌC
+    ========================================================================== -->
+    <section id="scene-heart">
+        <!-- Khung hình nằm ngang kéo dài (widescreen-stage) giúp không gian đêm rộng và dài -->
+        <div class="widescreen-stage" id="widescreen-stage">
+            <!-- Canvas 3D vẽ hàng nghìn hạt ánh sáng đổi màu tự động + vòng xoáy + trái tim -->
+            <canvas id="particle-canvas"></canvas>
+        </div>
+
+        <!-- Dòng nhắc chạm vào vòng xoáy giống 00:00 - 00:03 trong video -->
+        <div class="vortex-hint" id="vortex-hint-pill">
+            👆 Chạm vào vòng xoáy hạt để triệu hồi Trái Tim 3D
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         LỜI BÀI HÁT (LYRICS) ĐẶT Ở DƯỚI CÙNG, NHỎ GỌN, CHẠY NGAY TỪ BÓ HOA
+    ========================================================================== -->
+    <div class="lyrics-container theme-bouquet" id="lyrics-box">
+        <div class="lyric-line-main" id="lyric-current">♪ Với thêm bao diệu kỳ...</div>
+        <div class="lyric-line-sub" id="lyric-next">Tình anh chẳng khác đi (khác đi)</div>
+    </div>
+
+    <!-- =========================================================================
+         THANH CÔNG CỤ NỔI (GÓC TRÊN PHẢI): NẠP & CẮT 2S CUỐI MP3, ĐỔI MÀU, SỬA FILE
+    ========================================================================== -->
+    <div class="floating-toolbar bouquet-toolbar" id="main-toolbar">
+        <button id="btn-back-bouquet" class="tool-btn hidden" title="Quay lại bó hoa QR">
+            <span>💐</span> <span class="hidden sm:inline">Bó hoa</span>
+        </button>
+        <button id="btn-rotate-frame" class="tool-btn hidden" title="Xoay ngang toàn khung hình trên điện thoại">
+            <span>↔️</span> <span id="rotate-frame-label" class="hidden sm:inline">Khung ngang</span>
+        </button>
+        <button id="btn-quick-mp3" class="tool-btn" title="Chọn file MP3 gốc bạn đã gửi để tự động cắt 2 giây cuối và nhúng vĩnh viễn vào code">
+            <span>🎵</span> <span id="quick-mp3-label">Gắn MP3 gốc (-2s cuối)</span>
+        </button>
+        <button id="btn-download-embedded" class="tool-btn hidden !bg-emerald-600/80 !border-emerald-400 !text-white" title="Tải về file index.html đã nhúng sẵn âm thanh MP3 gốc (đã cắt 2s cuối) bên trong code">
+            <span>💾</span> <span>Tải HTML đã nhúng MP3</span>
+        </button>
+        <button id="btn-color-mode" class="tool-btn hidden" title="Chế độ đổi màu hạt tự động">
+            <span>🌈</span> <span id="color-mode-label">Đổi màu: Tự động</span>
+        </button>
+        <button id="btn-open-editor" class="tool-btn" title="Chỉnh sửa lời chúc, nhạc MP3 & xem 5 file nhỏ">
+            <span>⚙️</span> <span class="hidden sm:inline">Sửa Quà / File nhỏ</span>
+        </button>
+    </div>
+
+    <!-- Thẻ Audio ẩn tự động tìm file MP3 gốc của bạn và cắt 2 giây cuối -->
+    <audio id="bg-audio" preload="auto" crossorigin="anonymous">
+        <source src="1794199658927_705716130800943406_7732329818630727339.mp3" type="audio/mpeg">
+        <source src="nhac.mp3" type="audio/mpeg">
+    </audio>
+    <input type="file" id="mp3-file-input" accept="audio/*" class="hidden">
+
+    <!-- =========================================================================
+         MODAL 1: THẺ QUÀ TẶNG QR ĐỂ TẢI VỀ HOẶC GỬI CHO NGƯỜI YÊU QUÉT
+    ========================================================================== -->
+    <div id="qr-share-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-[#fbe4e6] border-2 border-[#d48b94] rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-[fadeIn_0.25s_ease]">
+            <button id="close-qr-modal" class="absolute top-3.5 right-4 w-8 h-8 rounded-full bg-[#e8c3c8] text-[#7a3b40] font-bold hover:bg-[#d9aab0] transition">✕</button>
+            <h3 class="text-xl font-bold text-[#8c4347] mb-1">Mã QR Bó Hoa Tình Yêu 💐</h3>
+            <p class="text-xs text-[#a65959] mb-4">Đưa điện thoại khác quét mã này hoặc chụp màn hình gửi cho người yêu nhé!</p>
+            
+            <div class="bg-white p-4 rounded-2xl shadow-inner inline-block border border-[#ebbec4] mb-3">
+                <div id="modal-qr-render" class="w-48 h-48 mx-auto flex items-center justify-center"></div>
+            </div>
+
+            <p class="text-xs font-semibold text-[#8c4347] mb-4" id="qr-target-url-display"></p>
+
+            <div class="flex gap-2 justify-center">
+                <button id="btn-copy-link" class="px-4 py-2 rounded-xl bg-[#a65959] text-white text-xs font-bold hover:bg-[#8c4347] transition">
+                    📋 Sao chép Link Quà Tặng
+                </button>
+                <button id="btn-enter-now" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600 transition">
+                    ❤️ Mở Trái Tim Ngay
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         MODAL 2: TRÌNH QUẢN LÝ "1 FILE LỚN CHỨA 5 FILE NHỎ" (DỄ SỬA CHỮA)
+    ========================================================================== -->
+    <div id="code-manager-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6">
+        <div class="bg-zinc-900 border border-pink-500/30 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col text-white shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-zinc-950/60">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">💝</span>
+                    <div>
+                        <h2 class="text-sm sm:text-base font-bold text-pink-400">Trình Tuỳ Chỉnh & Quản Lý Các File Nhỏ Bên Trong</h2>
+                        <p class="text-[11px] text-zinc-400">Dự án được chia làm 5 file nhỏ rõ ràng để bạn sửa lời bài hát, nhạc MP3 và tốc độ hạt</p>
+                    </div>
+                </div>
+                <button id="close-code-modal" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-sm font-bold">✕</button>
+            </div>
+
+            <!-- Tabs chọn các File nhỏ -->
+            <div class="flex overflow-x-auto border-b border-white/10 bg-zinc-950/40 px-4 pt-2 gap-1 text-xs font-semibold">
+                <button data-tab="tab-quick" class="subfile-tab px-3.5 py-2 rounded-t-xl bg-pink-500/20 text-pink-300 border-b-2 border-pink-400 whitespace-nowrap">
+                    ✨ 1. Sửa Nhanh (Nhạc & Lời)
+                </button>
+                <button data-tab="tab-architecture" class="subfile-tab px-3.5 py-2 rounded-t-xl text-zinc-400 hover:text-white whitespace-nowrap">
+                    📂 2. Cấu trúc 5 File Nhỏ
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5 overflow-y-auto space-y-5 text-xs sm:text-sm flex-1">
+                <!-- TAB 1: Sửa nhanh cấu hình (`config.js`) -->
+                <div id="tab-quick" class="space-y-4">
+                    <div class="bg-pink-500/10 border border-pink-500/25 rounded-2xl p-4">
+                        <div class="font-bold text-pink-300 mb-1">🎵 Trích Xuất Âm Thanh Gốc (Đã Cắt 2 Giây Cuối) & Nhúng Vào Code</div>
+                        <p class="text-zinc-300 text-xs mb-3">
+                            Hệ thống đã cấu hình tự động <b>cắt bỏ đúng 2.0 giây cuối</b> (phần đuôi TikTok từ <code>17.5s -> 19.5s</code>) và phát ngay từ màn hình Bó Hoa. Chọn file MP3 của bạn bên dưới để phát đúng giọng hát gốc và bấm <b>"Tải HTML đã nhúng MP3"</b> để lưu vĩnh viễn âm thanh gốc vào trong 1 file code duy nhất:
+                        </p>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <button id="btn-upload-mp3" class="px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs transition flex items-center gap-1.5">
+                                <span>📂</span> <span>Chọn file MP3 gốc (Tự cắt 2s cuối)</span>
+                            </button>
+                            <button id="btn-export-embedded-modal" class="hidden px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-1.5">
+                                <span>💾</span> <span>Tải file index.html đã nhúng MP3 gốc</span>
+                            </button>
+                            <select id="select-preset-song" class="px-3 py-2 rounded-xl bg-zinc-800 border border-white/15 text-white text-xs font-semibold">
+                                <option value="mp3_dang_yeu">🎶 Bản 1: Đáng Yêu (17.5s - Đã cắt 2s cuối)</option>
+                                <option value="video_mot_giay">🎶 Bản 2: Một Giây Thôi Đừng Trôi (Khớp Video)</option>
+                            </select>
+                            <span id="mp3-status-badge" class="text-[11px] text-emerald-400 font-medium">✔ Tự động chạy ngay từ Bó Hoa & cắt 2s cuối</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1 font-semibold">Dòng chữ dưới bó hoa:</label>
+                            <input type="text" id="input-bouquet-title" value="Chạm vào bó hoa" class="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-white/15 text-white text-xs focus:outline-none focus:border-pink-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1 font-semibold">Số giây cắt ở cuối file MP3:</label>
+                            <input type="number" step="0.1" id="input-trim-seconds" value="2.0" class="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-white/15 text-white text-xs focus:outline-none focus:border-pink-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1 font-semibold">Link khi quét mã QR:</label>
+                            <input type="text" id="input-qr-url" placeholder="Để trống tự nhận trang này" class="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-white/15 text-white text-xs focus:outline-none focus:border-pink-400">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1 font-semibold">
+                            Chỉnh sửa Lời Bài Hát Chạy Ở Dưới Cùng (Định dạng: <code>giây | lời chính | lời phụ</code>):
+                        </label>
+                        <textarea id="textarea-lyrics" rows="7" class="w-full p-3 rounded-xl bg-zinc-950 border border-white/15 font-mono text-xs text-pink-200 focus:outline-none focus:border-pink-400"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button id="btn-save-config" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs hover:opacity-95 transition shadow-lg">
+                            💾 Lưu & Áp Dụng Ngay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Cấu trúc 5 file nhỏ bên trong để dễ bảo trì -->
+                <div id="tab-architecture" class="hidden space-y-3">
+                    <p class="text-xs text-zinc-300">
+                        Để bạn dễ dàng sửa chữa theo đúng yêu cầu <b>"1 file lớn bên trong có các file nhỏ"</b>, toàn bộ mã nguồn trong file này được đóng gói thành <b>5 module độc lập</b> có đánh dấu rõ ràng:
+                    </p>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="p-3 rounded-xl bg-zinc-800/70 border border-white/10">
+                            <div class="font-bold text-pink-400">📄 [FILE NHỎ 1/5]: <code>style.css</code> (Thẻ &lt;style id="file-style-css"&gt;)</div>
+                            <div class="text-zinc-400 mt-0.5">Chứa màu nền hồng phấn <code>#fbe4e6</code>, hiệu ứng nhịp đập bó hoa, khung QR và hiệu ứng chữ phát sáng.</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-800/70 border border-white/10">
+                            <div class="font-bold text-pink-400">📄 [FILE NHỎ 2/5]: <code>config.js</code> (Biến <code>window.GIFT_CONFIG</code>)</div>
+                            <div class="text-zinc-400 mt-0.5">Chứa danh sách lời bài hát trích xuất từ file MP3 của bạn, bảng màu hạt đổi màu tự động và thông điệp cá nhân hóa.</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-800/70 border border-white/10">
+                            <div class="font-bold text-pink-400">📄 [FILE NHỎ 3/5]: <code>qr-bouquet.js</code> (Module <code>BouquetQRModule</code>)</div>
+                            <div class="text-zinc-400 mt-0.5">Tạo mã QR thật nằm trong bó hoa hồng, xử lý sự kiện chạm vào bó hoa hoặc tự động mở Trái Tim khi người yêu quét mã QR.</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-800/70 border border-white/10">
+                            <div class="font-bold text-pink-400">📄 [FILE NHỎ 4/5]: <code>audio-lyrics.js</code> (Module <code>AudioLyricsModule</code>)</div>
+                            <div class="text-zinc-400 mt-0.5">Đồng bộ hóa âm thanh MP3 + Bộ tổng hợp giai điệu tự động (Web Audio Synthesizer) khớp từng câu hát từ 00:00 đến 00:20.</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-800/70 border border-white/10">
+                            <div class="font-bold text-pink-400">📄 [FILE NHỎ 5/5]: <code>particle-heart-3d.js</code> (Module <code>ParticleHeart3DEngine</code>)</div>
+                            <div class="text-zinc-400 mt-0.5">Mô phỏng 100% video: Đĩa xoáy hạt 3D nằm ngang ở bước đầu, khi chạm vào các hạt xoắn ốc bay lên tạo thành Trái Tim 3D đập theo nhịp nhạc và tự động đổi màu mượt mà.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================================================
+         [FILE NHỎ 2/5]: config.js - CẤU HÌNH LỜI BÀI HÁT MP3, MÀU SẮC & CÁ NHÂN HÓA
+         Bạn chỉ cần sửa nội dung ở đây để thay đổi lời bài hát hoặc tốc độ hạt
+    ========================================================================== -->
+    <script id="file-config-js">
+        window.GIFT_CONFIG = {
+            // Nội dung phân cảnh 1 (Bó hoa)
+            bouquetTitle: "Chạm vào bó hoa",
+            customQrUrl: "", // Nếu để trống sẽ tự lấy link hiện tại kèm ?scene=heart
+
+            // Cắt bỏ đúng 2.0 giây cuối của file MP3 (loại bỏ tiếng outro TikTok ở giây 17.5 -> 19.53)
+            trimEndSeconds: 2.0,
+
+            // Dữ liệu âm thanh gốc dạng Base64 (tự động điền khi bấm "Tải HTML đã nhúng MP3")
+            embeddedAudioBase64: "",
+
+            // Chế độ đổi màu hạt tự động theo 4 sắc thái Tình Yêu: Đỏ, Hồng Nhạt, Hồng Đậm, Màu Son
+            autoColorCycle: true,
+            colorCycleSpeed: 0.38,
+            loveColorPalette: [
+                { name: "Màu Đỏ Tình Yêu", r: 255, g: 20,  b: 55,  hex: "#ff1437" }, // Đỏ rực rỡ
+                { name: "Màu Hồng Nhạt",   r: 255, g: 182, b: 209, hex: "#ffb6d1" }, // Hồng phấn dịu ngọt
+                { name: "Màu Hồng Đậm",    r: 255, g: 20,  b: 147, hex: "#ff1493" }, // Hồng đậm nồng nàn
+                { name: "Màu Son",         r: 220, g: 18,  b: 82,  hex: "#dc1252" }  // Đỏ son nhung quyến rũ
+            ],
+
+            // Bài hát đang chọn ('mp3_dang_yeu' khớp 100% file MP3 gửi sau khi cắt 2s cuối = 17.5s)
+            activeTrackKey: "mp3_dang_yeu",
+
+            // Dữ liệu âm thanh & lời bài hát trích xuất chính xác 100% từ file MP3 đã cắt 2 giây cuối
+            tracks: {
+                // BẢN 1: Trích xuất chính xác từng giây từ file MP3 bạn đính kèm (Tổng 19.5s - cắt 2s cuối = 17.5s)
+                mp3_dang_yeu: {
+                    name: "Đáng Yêu (Bản gốc MP3 - Đã cắt 2s cuối)",
+                    duration: 17.5, // Đã cắt bỏ 2 giây cuối (19.53s - 2.0s = 17.5s)
+                    lyrics: [
+                        { time: 0.0,  main: "♪ Với thêm bao diệu kỳ",             sub: "Tình anh chẳng khác đi..." },
+                        { time: 2.9,  main: "♪ Tình anh chẳng khác đi (khác đi)", sub: "Ừ thì anh đã yêu..." },
+                        { time: 5.9,  main: "♪ Ừ thì anh đã yêu",                 sub: "Phải lòng một cô đáng yêu..." },
+                        { time: 8.8,  main: "♪ Phải lòng một cô đáng yêu (yêu)",  sub: "Rằng cô ta rất kiêu..." },
+                        { time: 11.8, main: "♪ Rằng cô ta rất kiêu",              sub: "Điều đó cũng đáng yêu..." },
+                        { time: 14.6, main: "♪ Điều đó cũng đáng yêu (đáng yêu)", sub: "Món quà nhỏ dành tặng riêng em ❤️" }
+                    ],
+                    // Giai điệu + Hợp âm đệm khớp từng nhịp câu hát trong 17.5 giây (đã cắt 2s cuối)
+                    melodyNotes: [
+                        // Câu 1: "Với thêm bao diệu kỳ" (0.0s - 2.9s)
+                        { t: 0.05, f: 523.25, d: 0.42, bass: 261.63 }, { t: 0.50, f: 587.33, d: 0.42 }, { t: 0.95, f: 659.25, d: 0.48 }, { t: 1.48, f: 783.99, d: 0.52, bass: 349.23 }, { t: 2.05, f: 659.25, d: 0.75 },
+                        // Câu 2: "Tình anh chẳng khác đi (khác đi)" (2.9s - 5.9s)
+                        { t: 2.95, f: 587.33, d: 0.42, bass: 293.66 }, { t: 3.42, f: 659.25, d: 0.42 }, { t: 3.90, f: 587.33, d: 0.48 }, { t: 4.45, f: 523.25, d: 0.60, bass: 392.00 }, { t: 5.15, f: 659.25, d: 0.32 }, { t: 5.50, f: 587.33, d: 0.38 },
+                        // Câu 3: "Ừ thì anh đã yêu" (5.9s - 8.8s)
+                        { t: 5.95, f: 523.25, d: 0.38, bass: 261.63 }, { t: 6.38, f: 587.33, d: 0.38 }, { t: 6.82, f: 659.25, d: 0.45 }, { t: 7.35, f: 880.00, d: 0.45, bass: 349.23 }, { t: 7.88, f: 783.99, d: 0.80 },
+                        // Câu 4: "Phải lòng một cô đáng yêu (yêu)" (8.8s - 11.8s)
+                        { t: 8.85, f: 659.25, d: 0.38, bass: 329.63 }, { t: 9.28, f: 587.33, d: 0.38 }, { t: 9.72, f: 659.25, d: 0.42 }, { t: 10.20, f: 783.99, d: 0.48, bass: 220.00 }, { t: 10.75, f: 659.25, d: 0.48 }, { t: 11.30, f: 783.99, d: 0.42 },
+                        // Câu 5: "Rằng cô ta rất kiêu" (11.8s - 14.6s)
+                        { t: 11.85, f: 587.33, d: 0.42, bass: 293.66 }, { t: 12.32, f: 659.25, d: 0.42 }, { t: 12.80, f: 783.99, d: 0.45 }, { t: 13.32, f: 880.00, d: 0.42, bass: 392.00 }, { t: 13.80, f: 783.99, d: 0.70 },
+                        // Câu 6: "Điều đó cũng đáng yêu (đáng yêu)" (14.6s - 17.5s, dừng đúng 17.5s cắt bỏ 2s cuối)
+                        { t: 14.65, f: 659.25, d: 0.40, bass: 261.63 }, { t: 15.10, f: 783.99, d: 0.40 }, { t: 15.55, f: 659.25, d: 0.42 }, { t: 16.02, f: 587.33, d: 0.42, bass: 392.00 }, { t: 16.50, f: 523.25, d: 0.55, bass: 261.63 }, { t: 17.10, f: 659.25, d: 0.35 }
+                    ]
+                },
+
+                // BẢN 2: Trích xuất chính xác từ lời bài hát trong Video ("Một Giây Thôi Đừng Trôi" - cắt 2s cuối còn 19.5s)
+                video_mot_giay: {
+                    name: "Một Giây Thôi Đừng Trôi (Nhạc trong Video)",
+                    duration: 19.5,
+                    lyrics: [
+                        { time: 0.0,  main: "♪ Một giây thôi đừng trôi",            sub: "Để anh được nói câu yêu..." },
+                        { time: 2.3,  main: "♪ Để anh được nói câu yêu",           sub: "Thế giới thật to..." },
+                        { time: 5.0,  main: "♪ Thế giới thật to nhưng chẳng bằng ước mơ", sub: "Ước mơ cùng em cầm tay đi đêm dài" },
+                        { time: 8.2,  main: "♪ Ước mơ cùng em cầm tay đi đêm dài", sub: "Người hãy tới bên anh..." },
+                        { time: 11.2, main: "♪ Người hãy tới bên anh",             sub: "Để hiện thực đến thật nhanh..." },
+                        { time: 13.5, main: "♪ Để hiện thực đến thật nhanh... hơ ơ", sub: "Thế giới thật to nhưng em là nhất" },
+                        { time: 17.0, main: "♪ Một giây thôi đừng trôi",           sub: "Để anh được nói câu yêu..." }
+                    ],
+                    melodyNotes: [
+                        { t: 0.1, f: 659.25, d: 0.45, bass: 349.23 }, { t: 0.6, f: 783.99, d: 0.45 }, { t: 1.1, f: 880.00, d: 0.5 }, { t: 1.7, f: 783.99, d: 0.5 },
+                        { t: 2.3, f: 659.25, d: 0.45, bass: 392.00 }, { t: 2.8, f: 587.33, d: 0.45 }, { t: 3.3, f: 659.25, d: 0.5 }, { t: 3.9, f: 523.25, d: 0.9 },
+                        { t: 5.0, f: 698.46, d: 0.45, bass: 329.63 }, { t: 5.5, f: 783.99, d: 0.45 }, { t: 6.0, f: 880.00, d: 0.5 }, { t: 6.6, f: 783.99, d: 0.5 }, { t: 7.2, f: 698.46, d: 0.8 },
+                        { t: 8.2, f: 659.25, d: 0.45, bass: 220.00 }, { t: 8.7, f: 783.99, d: 0.45 }, { t: 9.2, f: 659.25, d: 0.5 }, { t: 9.8, f: 587.33, d: 0.9 },
+                        { t: 11.2, f: 523.25, d: 0.45, bass: 293.66 }, { t: 11.7, f: 659.25, d: 0.45 }, { t: 12.2, f: 783.99, d: 0.8 },
+                        { t: 13.5, f: 880.00, d: 0.5, bass: 392.00 }, { t: 14.1, f: 783.99, d: 0.5 }, { t: 14.7, f: 659.25, d: 0.6 }, { t: 15.5, f: 523.25, d: 1.1 },
+                        { t: 17.0, f: 659.25, d: 0.5, bass: 261.63 }, { t: 17.6, f: 783.99, d: 0.5 }, { t: 18.2, f: 880.00, d: 0.6 }, { t: 18.9, f: 523.25, d: 0.5 }
+                    ]
+                }
+            }
+        };
+    </script>
+
+
+    <!-- =========================================================================
+         [FILE NHỎ 3/5]: qr-bouquet.js - TẠO MÃ QR TRONG BÓ HOA & CHUYỂN CẢNH
+         Xử lý việc tạo mã QR thật có thể quét và chuyển từ Bó Hoa sang Vũ Trụ Hạt
+    ========================================================================== -->
+    <script id="file-qr-bouquet-js">
+        const BouquetQRModule = (() => {
+            const sceneBouquet = document.getElementById('scene-bouquet');
+            const sceneHeart = document.getElementById('scene-heart');
+            const bouquetTrigger = document.getElementById('bouquet-trigger');
+            const touchTextTrigger = document.getElementById('touch-text-trigger');
+            const qrBouquetBox = document.getElementById('qr-bouquet-box');
+            const bouquetQrRender = document.getElementById('bouquet-qr-render');
+            const modalQrRender = document.getElementById('modal-qr-render');
+            const qrTargetUrlDisplay = document.getElementById('qr-target-url-display');
+            const lyricsBox = document.getElementById('lyrics-box');
+            const mainToolbar = document.getElementById('main-toolbar');
+
+            // Hàm lấy đường dẫn đích cho mã QR (khi người yêu quét sẽ vào thẳng phân cảnh Trái Tim)
+            function getTargetGiftUrl() {
+                if (window.GIFT_CONFIG.customQrUrl && window.GIFT_CONFIG.customQrUrl.trim() !== '') {
+                    return window.GIFT_CONFIG.customQrUrl.trim();
+                }
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('scene', 'heart');
+                    return url.toString();
+                } catch (e) {
+                    return window.location.href + '?scene=heart';
+                }
+            }
+
+            // Vẽ mã QR thật lên vùng chứa bằng thư viện qrcode-generator (màu đỏ rượu vang lãng mạn)
+            function renderQRCode() {
+                const targetUrl = getTargetGiftUrl();
+                qrTargetUrlDisplay.textContent = targetUrl;
+
+                if (typeof qrcode !== 'undefined') {
+                    try {
+                        const qr = qrcode(0, 'M');
+                        qr.addData(targetUrl);
+                        qr.make();
+
+                        const moduleCount = qr.getModuleCount();
+                        const createQrSvg = (fgColor, bgColor) => {
+                            let pathData = '';
+                            for (let r = 0; r < moduleCount; r++) {
+                                for (let c = 0; c < moduleCount; c++) {
+                                    if (qr.isDark(r, c)) {
+                                        pathData += `M${c},${r}h1v1h-1z `;
+                                    }
+                                }
+                            }
+                            return `<svg viewBox="0 0 ${moduleCount} ${moduleCount}" width="100%" height="100%" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="${moduleCount}" height="${moduleCount}" fill="${bgColor}" rx="2"/>
+                                <path d="${pathData}" fill="${fgColor}"/>
+                            </svg>`;
+                        };
+
+                        bouquetQrRender.innerHTML = createQrSvg('#7a2430', '#fff7f8');
+                        modalQrRender.innerHTML = createQrSvg('#6e1d28', '#ffffff');
+                    } catch (err) {
+                        console.error('QR generation fallback:', err);
+                    }
+                }
+            }
+
+            // Chuyển từ Phân cảnh 1 (Bó Hoa nền hồng) sang Phân cảnh 2 (Vũ trụ Vòng Xoáy & Trái Tim 3D)
+            function enterHeartScene(autoFormHeartImmediately = false) {
+                sceneBouquet.classList.add('fade-out');
+                sceneHeart.classList.add('active');
+
+                // Đổi giao diện lời bài hát ở đáy sang tông phát sáng trên nền đen
+                lyricsBox.classList.remove('theme-bouquet');
+                lyricsBox.classList.add('theme-heart');
+                mainToolbar.classList.remove('bouquet-toolbar');
+
+                // Hiện các nút điều khiển của Phân cảnh 2
+                document.getElementById('btn-back-bouquet').classList.remove('hidden');
+                document.getElementById('btn-rotate-frame').classList.remove('hidden');
+                document.getElementById('btn-color-mode').classList.remove('hidden');
+
+                // Đảm bảo âm thanh đã được mở khoá khi người dùng chạm
+                AudioLyricsModule.unlockAudioOnInteraction();
+
+                // Đảm bảo hệ thống hạt 3D đã chạy
+                ParticleHeart3DEngine.start();
+
+                if (autoFormHeartImmediately) {
+                    ParticleHeart3DEngine.setHeartFormed(true);
+                }
+            }
+
+            // Quay lại màn hình Bó Hoa nền hồng (Nhạc và lời ở dưới vẫn chạy xuyên suốt)
+            function backToBouquetScene() {
+                sceneBouquet.classList.remove('fade-out');
+                sceneHeart.classList.remove('active');
+
+                lyricsBox.classList.remove('theme-heart');
+                lyricsBox.classList.add('theme-bouquet');
+                mainToolbar.classList.add('bouquet-toolbar');
+
+                document.getElementById('btn-back-bouquet').classList.add('hidden');
+                document.getElementById('btn-rotate-frame').classList.add('hidden');
+                document.getElementById('btn-color-mode').classList.add('hidden');
+                ParticleHeart3DEngine.setHeartFormed(false);
+            }
+
+            function init() {
+                renderQRCode();
+
+                // Chạm vào bó hoa hoặc chữ "Chạm vào bó hoa" -> vào Phân cảnh 2
+                bouquetTrigger.addEventListener('click', () => enterHeartScene(false));
+                touchTextTrigger.addEventListener('click', () => enterHeartScene(false));
+
+                // Nút phóng to mã QR ngay trong bó hoa để điện thoại khác dễ quét
+                const btnToggleZoom = document.getElementById('btn-toggle-qr-zoom');
+                const zoomLabel = document.getElementById('qr-zoom-label');
+                btnToggleZoom.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isZoomed = qrBouquetBox.classList.toggle('zoom-qr');
+                    zoomLabel.textContent = isZoomed ? 'Thu nhỏ QR' : 'Phóng to QR';
+                });
+
+                // Nút mở hộp thoại chia sẻ mã QR
+                const qrModal = document.getElementById('qr-share-modal');
+                document.getElementById('btn-share-qr-modal').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    qrModal.classList.remove('hidden');
+                    qrModal.classList.add('flex');
+                });
+                document.getElementById('close-qr-modal').addEventListener('click', () => {
+                    qrModal.classList.add('hidden');
+                    qrModal.classList.remove('flex');
+                });
+                document.getElementById('btn-enter-now').addEventListener('click', () => {
+                    qrModal.classList.add('hidden');
+                    qrModal.classList.remove('flex');
+                    enterHeartScene(false);
+                });
+
+                // Sao chép link quà tặng
+                const btnCopyLink = document.getElementById('btn-copy-link');
+                btnCopyLink.addEventListener('click', () => {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = getTargetGiftUrl();
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    btnCopyLink.textContent = '✔ Đã sao chép Link!';
+                    setTimeout(() => {
+                        btnCopyLink.textContent = '📋 Sao chép Link Quà Tặng';
+                    }, 2000);
+                });
+
+                // Nút quay về bó hoa
+                document.getElementById('btn-back-bouquet').addEventListener('click', backToBouquetScene);
+
+                // Nếu người yêu vừa quét mã QR (URL có ?scene=heart), tự động hiệu ứng mở bó hoa sau 0.6s
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('scene') === 'heart') {
+                    setTimeout(() => {
+                        enterHeartScene(false);
+                    }, 550);
+                }
+            }
+
+            return { init, renderQRCode, enterHeartScene };
+        })();
+    </script>
+
+
+    <!-- =========================================================================
+         [FILE NHỎ 4/5]: audio-lyrics.js - PHÁT NHẠC & LỜI NGAY TỪ BÓ HOA + CẮT 2 GIÂY CUỐI
+         - Khởi chạy lời bài hát và nhạc ngay lập tức từ giây 0.00 ở màn hình Bó Hoa.
+         - Cắt bỏ chính xác 2.0 giây cuối của file MP3 bằng Web Audio Buffer + Audio Trim.
+         - Hỗ trợ nhúng vĩnh viễn file MP3 đã cắt 2 giây cuối vào trong code HTML.
+    ========================================================================== -->
+    <script id="file-audio-lyrics-js">
+        const AudioLyricsModule = (() => {
+            const audioEl = document.getElementById('bg-audio');
+            const lyricCurrentEl = document.getElementById('lyric-current');
+            const lyricNextEl = document.getElementById('lyric-next');
+
+            let audioCtx = null;
+            let trimmedAudioBuffer = null; // Buffer âm thanh gốc sau khi đã cắt 2 giây cuối
+            let bufferSourceNode = null;
+            let bufferStartTime = 0;
+            let bufferEffectiveDuration = 17.5;
+
+            let useWebAudioBuffer = false;
+            let useHtmlAudioElement = false;
+            let isLyricsRunning = false;
+            let clockStartTime = performance.now() / 1000;
+            let lastScheduledLoop = -1;
+
+            function ensureAudioContext() {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) {
+                        audioCtx = new AudioContextClass();
+                    }
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume().catch(() => {});
+                }
+                return audioCtx;
+            }
+
+            // Phát Buffer âm thanh gốc với vòng lặp đã cắt bỏ 2 giây cuối (loopEnd = duration - 2.0)
+            function startTrimmedBufferPlayback() {
+                if (!trimmedAudioBuffer) return;
+                const ctx = ensureAudioContext();
+                if (!ctx) return;
+
+                if (bufferSourceNode) {
+                    try { bufferSourceNode.stop(); bufferSourceNode.disconnect(); } catch (e) {}
+                }
+
+                const trimSec = parseFloat(window.GIFT_CONFIG.trimEndSeconds) || 2.0;
+                bufferEffectiveDuration = Math.max(1.5, trimmedAudioBuffer.duration - trimSec);
+
+                bufferSourceNode = ctx.createBufferSource();
+                bufferSourceNode.buffer = trimmedAudioBuffer;
+                bufferSourceNode.loop = true;
+                bufferSourceNode.loopStart = 0;
+                bufferSourceNode.loopEnd = bufferEffectiveDuration; // Cắt bỏ hoàn toàn 2 giây cuối!
+
+                const gainNode = ctx.createGain();
+                gainNode.gain.value = 0.95;
+                bufferSourceNode.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                bufferStartTime = ctx.currentTime;
+                bufferSourceNode.start(0, 0);
+                useWebAudioBuffer = true;
+                useHtmlAudioElement = false;
+                audioEl.pause();
+            }
+
+            // Chuyển đổi AudioBuffer (đã cắt 2 giây cuối) sang chuỗi WAV Base64 để nhúng thẳng vào code HTML
+            function trimmedBufferToWavBase64(buffer, maxDurationSec) {
+                const numOfChan = Math.min(2, buffer.numberOfChannels);
+                const sampleRate = buffer.sampleRate;
+                const numSamples = Math.min(buffer.length, Math.floor(maxDurationSec * sampleRate));
+                const bytesPerSample = 2; // 16-bit PCM
+                const blockAlign = numOfChan * bytesPerSample;
+                const dataSize = numSamples * blockAlign;
+                const arrayBuffer = new ArrayBuffer(44 + dataSize);
+                const view = new DataView(arrayBuffer);
+
+                const writeStr = (offset, str) => {
+                    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+                };
+
+                writeStr(0, 'RIFF');
+                view.setUint32(4, 36 + dataSize, true);
+                writeStr(8, 'WAVE');
+                writeStr(12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true);
+                view.setUint16(22, numOfChan, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * blockAlign, true);
+                view.setUint16(32, blockAlign, true);
+                view.setUint16(34, 16, true);
+                writeStr(36, 'data');
+                view.setUint32(40, dataSize, true);
+
+                const channels = [];
+                for (let ch = 0; ch < numOfChan; ch++) {
+                    channels.push(buffer.getChannelData(ch));
+                }
+
+                let offset = 44;
+                for (let i = 0; i < numSamples; i++) {
+                    for (let ch = 0; ch < numOfChan; ch++) {
+                        let sample = Math.max(-1, Math.min(1, channels[ch][i]));
+                        sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                        view.setInt16(offset, sample, true);
+                        offset += 2;
+                    }
+                }
+
+                const bytes = new Uint8Array(arrayBuffer);
+                let binary = '';
+                const chunkSize = 0x8000;
+                for (let i = 0; i < bytes.length; i += chunkSize) {
+                    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+                }
+                return 'data:audio/wav;base64,' + btoa(binary);
+            }
+
+            // Giải mã ArrayBuffer của file MP3, cắt bỏ 2 giây cuối và phát ngay lập tức
+            async function decodeAndTrimAudioArrayBuffer(arrayBuffer, labelName = 'MP3 gốc') {
+                const ctx = ensureAudioContext();
+                if (!ctx) return;
+
+                try {
+                    const decodedBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+                    trimmedAudioBuffer = decodedBuffer;
+                    const trimSec = parseFloat(window.GIFT_CONFIG.trimEndSeconds) || 2.0;
+                    bufferEffectiveDuration = Math.max(1.5, decodedBuffer.duration - trimSec);
+
+                    // Cập nhật lại thời lượng bài hát theo đúng file MP3 sau khi cắt 2 giây cuối
+                    window.GIFT_CONFIG.tracks[window.GIFT_CONFIG.activeTrackKey].duration = Number(bufferEffectiveDuration.toFixed(2));
+
+                    startTrimmedBufferPlayback();
+
+                    // Lưu bản Base64 đã cắt 2 giây cuối vào GIFT_CONFIG để người dùng có thể tải file HTML tự chứa
+                    try {
+                        window.GIFT_CONFIG.embeddedAudioBase64 = trimmedBufferToWavBase64(decodedBuffer, bufferEffectiveDuration);
+                        document.getElementById('btn-download-embedded').classList.remove('hidden');
+                        document.getElementById('btn-export-embedded-modal').classList.remove('hidden');
+                    } catch (err) {
+                        console.warn('Base64 encode warning:', err);
+                    }
+
+                    const statusBadge = document.getElementById('mp3-status-badge');
+                    if (statusBadge) {
+                        statusBadge.textContent = `✔ Đang phát ${labelName} (Đã cắt ${trimSec}s cuối -> còn ${bufferEffectiveDuration.toFixed(1)}s)`;
+                    }
+                    const quickMp3Label = document.getElementById('quick-mp3-label');
+                    if (quickMp3Label) {
+                        quickMp3Label.textContent = `Đã gắn MP3 (-${trimSec}s cuối)`;
+                    }
+                } catch (e) {
+                    console.warn('Decode audio fallback to HTML5 Audio:', e);
+                }
+            }
+
+            // Tự động dò tìm âm thanh gốc khi vừa mở trang:
+            // 1. Kiểm tra `embeddedAudioBase64` trong code
+            // 2. Thử tải `1794199658927_705716130800943406_7732329818630727339.mp3` hoặc `nhac.mp3`
+            async function autoProbeOriginalAudio() {
+                if (window.GIFT_CONFIG.embeddedAudioBase64 && window.GIFT_CONFIG.embeddedAudioBase64.startsWith('data:audio')) {
+                    try {
+                        const res = await fetch(window.GIFT_CONFIG.embeddedAudioBase64);
+                        const buf = await res.arrayBuffer();
+                        await decodeAndTrimAudioArrayBuffer(buf, 'MP3 nhúng sẵn trong code');
+                        return;
+                    } catch (e) {}
+                }
+
+                const candidateFiles = [
+                    '1794199658927_705716130800943406_7732329818630727339.mp3',
+                    'nhac.mp3'
+                ];
+
+                for (const fileName of candidateFiles) {
+                    try {
+                        const res = await fetch(fileName);
+                        if (res.ok) {
+                            const contentType = res.headers.get('content-type') || '';
+                            if (!contentType.includes('text/html')) {
+                                const buf = await res.arrayBuffer();
+                                await decodeAndTrimAudioArrayBuffer(buf, fileName);
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        // Tiếp tục thử phương án tiếp theo
+                    }
+                }
+            }
+
+            // Nếu dùng thẻ <audio> thông thường, kiểm soát chặt chẽ cắt bỏ 2 giây cuối
+            audioEl.addEventListener('timeupdate', () => {
+                if (audioEl.duration && !isNaN(audioEl.duration)) {
+                    const trimSec = parseFloat(window.GIFT_CONFIG.trimEndSeconds) || 2.0;
+                    const cutPoint = Math.max(1.0, audioEl.duration - trimSec);
+                    if (audioEl.currentTime >= cutPoint) {
+                        audioEl.currentTime = 0;
+                        audioEl.play().catch(() => {});
+                    }
+                }
+            });
+
+            // Khi người dùng chọn file MP3 từ máy tính / điện thoại
+            function loadUserMp3File(file) {
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    if (ev.target && ev.target.result) {
+                        await decodeAndTrimAudioArrayBuffer(ev.target.result, file.name);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+
+                // Đồng thời gán cho thẻ audio dự phòng
+                const fileUrl = URL.createObjectURL(file);
+                audioEl.src = fileUrl;
+            }
+
+            // Bộ phát giai điệu + hợp âm lãng mạn (tự động chạy khi chưa gắn file ngoài)
+            function playRomanticNote(freq, startOffset, duration, bassFreq) {
+                if (!audioCtx || audioCtx.state !== 'running') return;
+                const now = audioCtx.currentTime;
+                const noteStart = now + startOffset;
+                if (noteStart < now) return;
+
+                const osc = audioCtx.createOscillator();
+                const subOsc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, noteStart);
+
+                subOsc.type = 'triangle';
+                subOsc.frequency.setValueAtTime(freq * 0.5, noteStart);
+
+                gain.gain.setValueAtTime(0.0001, noteStart);
+                gain.gain.linearRampToValueAtTime(0.07, noteStart + 0.035);
+                gain.gain.exponentialRampToValueAtTime(0.0008, noteStart + duration + 0.22);
+
+                osc.connect(gain);
+                subOsc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(noteStart);
+                subOsc.start(noteStart);
+                osc.stop(noteStart + duration + 0.25);
+                subOsc.stop(noteStart + duration + 0.25);
+
+                if (bassFreq) {
+                    const bassOsc = audioCtx.createOscillator();
+                    const bassGain = audioCtx.createGain();
+                    bassOsc.type = 'sine';
+                    bassOsc.frequency.setValueAtTime(bassFreq, noteStart);
+                    bassGain.gain.setValueAtTime(0.0001, noteStart);
+                    bassGain.gain.linearRampToValueAtTime(0.045, noteStart + 0.05);
+                    bassGain.gain.exponentialRampToValueAtTime(0.0005, noteStart + duration + 0.55);
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(audioCtx.destination);
+                    bassOsc.start(noteStart);
+                    bassOsc.stop(noteStart + duration + 0.6);
+                }
+            }
+
+            // Vòng lặp cập nhật lời bài hát ở đáy màn hình NGAY TỪ KHI VÀO BÓ HOA
+            function updateLyricsLoop() {
+                if (!isLyricsRunning) return;
+
+                const track = window.GIFT_CONFIG.tracks[window.GIFT_CONFIG.activeTrackKey];
+                const duration = track.duration || 17.5; // Mặc định 17.5s (đã cắt 2s cuối)
+                let elapsed = 0;
+
+                if (useWebAudioBuffer && audioCtx && trimmedAudioBuffer) {
+                    elapsed = (audioCtx.currentTime - bufferStartTime) % bufferEffectiveDuration;
+                } else if (useHtmlAudioElement && !audioEl.paused && audioEl.duration) {
+                    const trimSec = parseFloat(window.GIFT_CONFIG.trimEndSeconds) || 2.0;
+                    const effectiveDur = Math.max(1.5, audioEl.duration - trimSec);
+                    if (audioEl.currentTime >= effectiveDur) {
+                        audioEl.currentTime = 0;
+                    }
+                    elapsed = audioEl.currentTime % effectiveDur;
+                } else {
+                    const nowSec = audioCtx && audioCtx.state === 'running'
+                        ? audioCtx.currentTime
+                        : performance.now() / 1000;
+                    const totalElapsed = Math.max(0, nowSec - clockStartTime);
+                    const currentLoopIndex = Math.floor(totalElapsed / duration);
+                    elapsed = totalElapsed % duration;
+
+                    // Phát nốt nhạc giai điệu nếu đang dùng bộ tổng hợp tích hợp
+                    if (audioCtx && audioCtx.state === 'running' && currentLoopIndex !== lastScheduledLoop) {
+                        lastScheduledLoop = currentLoopIndex;
+                        track.melodyNotes.forEach(note => {
+                            if (note.t < duration) {
+                                const delay = note.t - elapsed;
+                                if (delay >= -0.05) {
+                                    playRomanticNote(note.f, Math.max(0, delay), note.d, note.bass);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                // Tìm câu hát khớp với thời gian hiện tại
+                const lyrics = track.lyrics;
+                let activeIdx = 0;
+                for (let i = 0; i < lyrics.length; i++) {
+                    if (elapsed >= lyrics[i].time) {
+                        activeIdx = i;
+                    } else {
+                        break;
+                    }
+                }
+
+                const currentLine = lyrics[activeIdx];
+                const nextLine = lyrics[(activeIdx + 1) % lyrics.length];
+
+                if (currentLine && lyricCurrentEl.textContent !== currentLine.main) {
+                    lyricCurrentEl.textContent = currentLine.main;
+                    lyricNextEl.textContent = currentLine.sub || (nextLine ? nextLine.main : '');
+
+                    // Hiệu ứng chuyển câu mềm mại ở đáy màn hình
+                    lyricCurrentEl.classList.remove('lyric-animate');
+                    void lyricCurrentEl.offsetWidth;
+                    lyricCurrentEl.classList.add('lyric-animate');
+                }
+
+                requestAnimationFrame(updateLyricsLoop);
+            }
+
+            // Mở khoá âm thanh ngay khi có bất kỳ cử chỉ chạm/di chuột nào trên trang Bó Hoa
+            function unlockAudioOnInteraction() {
+                const ctx = ensureAudioContext();
+                if (trimmedAudioBuffer && !useWebAudioBuffer) {
+                    startTrimmedBufferPlayback();
+                } else if (ctx && ctx.state === 'running' && lastScheduledLoop === -1 && !useWebAudioBuffer) {
+                    clockStartTime = ctx.currentTime;
+                }
+            }
+
+            // Khởi chạy ngay lập tức từ giây 0.00 khi vừa vào màn hình Bó Hoa!
+            function startImmediatelyOnScene1() {
+                if (isLyricsRunning) return;
+                isLyricsRunning = true;
+
+                ensureAudioContext();
+                clockStartTime = audioCtx && audioCtx.state === 'running'
+                    ? audioCtx.currentTime
+                    : performance.now() / 1000;
+
+                // Thử tự động nạp file MP3 gốc của bạn
+                autoProbeOriginalAudio();
+
+                // Khởi chạy vòng lặp hiển thị lời bài hát ở đáy màn hình ngay lập tức
+                updateLyricsLoop();
+
+                // Tự động bật tiếng ngay khi người dùng chạm nhẹ bất cứ đâu trên màn hình
+                ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(evtName => {
+                    window.addEventListener(evtName, unlockAudioOnInteraction, { once: true, passive: true });
+                });
+            }
+
+            function restartTrack() {
+                lastScheduledLoop = -1;
+                if (useWebAudioBuffer && trimmedAudioBuffer) {
+                    startTrimmedBufferPlayback();
+                } else {
+                    clockStartTime = audioCtx && audioCtx.state === 'running'
+                        ? audioCtx.currentTime
+                        : performance.now() / 1000;
+                }
+            }
+
+            // Xuất ra file index.html hoàn chỉnh đã nhúng sẵn âm thanh MP3 gốc (đã cắt 2s cuối) bên trong code
+            function downloadHtmlWithEmbeddedMp3() {
+                if (!window.GIFT_CONFIG.embeddedAudioBase64) return;
+                let fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+                fullHtml = fullHtml.replace(
+                    /embeddedAudioBase64:\s*"[^"]*"/,
+                    `embeddedAudioBase64: "${window.GIFT_CONFIG.embeddedAudioBase64}"`
+                );
+
+                const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'qua-tang-tinh-yeu-da-nhung-mp3.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            return {
+                startImmediatelyOnScene1,
+                unlockAudioOnInteraction,
+                loadUserMp3File,
+                restartTrack,
+                downloadHtmlWithEmbeddedMp3
+            };
+        })();
+    </script>
+
+
+    <!-- =========================================================================
+         [FILE NHỎ 5/5]: particle-heart-3d.js - ENGINE VÒNG XOÁY "LOVE", TRÁI TIM 3D TRÒN ĐẦY,
+         HẠT HÚT VÀO/NHẢ RA, SAO BĂNG TRẮNG THỰC TẾ, KHUNG NGANG & TRỤC-TIM NẰM DỌC NHỎ GỌN
+    ========================================================================== -->
+    <script id="file-particle-heart-3d-js">
+        const ParticleHeart3DEngine = (() => {
+            const stageEl = document.getElementById('widescreen-stage');
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            const vortexHintPill = document.getElementById('vortex-hint-pill');
+
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            // Trạng thái: false = Chỉ có vòng xoáy (như 00:00-00:03), true = Đã bung Trái Tim 3D
+            let isHeartFormed = false;
+            let heartTransition = 0; // 0.0 -> 1.0
+            let isRunning = false;
+
+            // Khóa góc xoay của Trái Tim = 0 để Trái Tim luôn đứng yên chính diện
+            const HEART_ROTATION_Y = 0;
+
+            // Tỷ lệ khối Trái Tim + Trục xoay to rõ, cân đối trọn vẹn trong khung hình ngang
+            const SCENE_COMPACT_SCALE = 1.06;
+
+            // Trục và Trái Tim xếp thẳng hàng theo phương dọc (X = 0):
+            // Trái Tim ở trên (HEART_CENTER_Y = -34, mũi tim ở y ≈ +32), Trục xoay sát ngay dưới (VORTEX_BASE_Y = +52)
+            const HEART_CENTER_Y = -34;
+            const VORTEX_BASE_Y  = 52;
+
+            // Bán kính tối đa của trục xoay phía dưới được thu nhỏ gọn gàng (~50% bề ngang trái tim)
+            const VORTEX_MAX_RADIUS = 38;
+
+            // Các hệ thống hạt li ti trong vũ trụ
+            const ambientSkyParticles  = []; // 950 hạt sao li ti lơ lửng & lấp lánh khắp bầu trời đêm ngoài trái tim
+            const fallingSnowParticles = []; // 520 hạt bụi sao li ti rơi nhẹ khắp khung cảnh ngoài trái tim
+            const heartParticles       = []; // 8200 hạt li ti siêu dày tạo khối Trái Tim 3D đứng yên đầy đặn
+            const heartLoveParticles   = []; // Các hạt li ti ghép thành chữ "love" nhỏ ở chính giữa Trái Tim, đập cùng nhịp tim
+            const vortexParticles      = []; // 2200 hạt li ti cố định tạo trục đĩa xoáy nhỏ gọn xoay tròn ở dưới
+            const loveRingParticles    = []; // Hạt li ti xếp thành chữ "LOVE" xoay tròn trong trục nhỏ dưới đáy
+            const suctionParticles     = []; // 500 hạt li ti ở trục xoay dưới bị Trái Tim hút vào và nhả ra
+            const shootingStars        = []; // Sao băng nhỏ màu trắng thực tế bay vụt qua màn đêm
+            const shootingSparks       = []; // Hạt bụi sao trắng siêu nhỏ vương lại sau đuôi sao băng
+            const fireworkParticles    = []; // Hạt li ti nổ đẹp như pháo hoa bên trong và bên ngoài Trái Tim
+
+            // Nội suy mượt giữa 4 màu sắc Tình Yêu: Đỏ -> Hồng Nhạt -> Hồng Đậm -> Màu Son
+            let paletteTime = 0;
+            function getLoveColorRGB(offset = 0) {
+                const palette = window.GIFT_CONFIG.loveColorPalette;
+                if (!window.GIFT_CONFIG.autoColorCycle) {
+                    return palette[0]; // Mặc định màu đỏ hồng tình yêu
+                }
+                const t = (paletteTime + offset + 100) % palette.length;
+                const idx1 = Math.floor(t) % palette.length;
+                const idx2 = (idx1 + 1) % palette.length;
+                const frac = t - Math.floor(t);
+                // Smoothstep để chuyển màu cực mượt
+                const s = frac * frac * (3 - 2 * frac);
+
+                const c1 = palette[idx1];
+                const c2 = palette[idx2];
+                return {
+                    r: Math.round(c1.r + (c2.r - c1.r) * s),
+                    g: Math.round(c1.g + (c2.g - c1.g) * s),
+                    b: Math.round(c1.b + (c2.b - c1.b) * s)
+                };
+            }
+
+            // Công thức tạo Trái Tim 3D cấu trúc TRÒN ĐẦY, DÀY ĐẶC HẠT & ĐỨNG YÊN THEO TRỤC DỌC
+            function sampleRoundPlumpHeart3D() {
+                const t = Math.random() * Math.PI * 2;
+                // Phân bố 3 lớp: viền sắc nét (30%), vỏ 3D căng phồng (42%) và lõi đặc bên trong (28%)
+                const randLayer = Math.random();
+                let shellBias;
+                if (randLayer < 0.30) {
+                    shellBias = 0.94 + Math.random() * 0.06;
+                } else if (randLayer < 0.72) {
+                    shellBias = 0.72 + Math.pow(Math.random(), 0.7) * 0.24;
+                } else {
+                    shellBias = Math.pow(Math.random(), 0.42) * 0.75;
+                }
+
+                // Phương trình trái tim cân đối theo trục dọc
+                const sinT = Math.sin(t);
+                const cosT = Math.cos(t);
+                const hx = 16.4 * Math.pow(sinT, 3);
+                const hy = -(13.6 * cosT - 4.5 * Math.cos(2 * t) - 1.4 * Math.cos(3 * t) - 0.45 * Math.cos(4 * t));
+
+                // Độ phồng 3D (Z) tròn đầy
+                const normalizedWidth = Math.min(1, Math.abs(hx) / 16.6);
+                const domeProfile = Math.sqrt(Math.max(0.08, 1 - normalizedWidth * normalizedWidth));
+                const thickness = 8.4 * domeProfile;
+                const zAngle = (Math.random() - 0.5) * Math.PI;
+                const hz = Math.sin(zAngle) * thickness * shellBias;
+
+                // Scale vừa vặn để mũi dưới trái tim nằm ngay sát trên trục xoay (~22px)
+                const heartScale = 3.85;
+                return {
+                    x: hx * shellBias * heartScale,
+                    y: hy * shellBias * heartScale + HEART_CENTER_Y,
+                    z: hz * heartScale,
+                    isCore: shellBias < 0.68
+                };
+            }
+
+            // Quét điểm ảnh chữ "love" nhỏ nhắn để tạo các hạt li ti nằm ở chính giữa Trái Tim 3D
+            function generateInnerHeartLoveParticles() {
+                heartLoveParticles.length = 0;
+                const offCanvas = document.createElement('canvas');
+                const offW = 280;
+                const offH = 110;
+                offCanvas.width = offW;
+                offCanvas.height = offH;
+                const offCtx = offCanvas.getContext('2d');
+
+                offCtx.fillStyle = '#000';
+                offCtx.fillRect(0, 0, offW, offH);
+                offCtx.fillStyle = '#fff';
+                offCtx.font = '700 62px "Dancing Script", "Quicksand", cursive, sans-serif';
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
+                offCtx.fillText('love', offW / 2, offH / 2);
+
+                const imgData = offCtx.getImageData(0, 0, offW, offH).data;
+                const step = 2;
+                for (let y = 0; y < offH; y += step) {
+                    for (let x = 0; x < offW; x += step) {
+                        const alpha = imgData[(y * offW + x) * 4];
+                        if (alpha > 115) {
+                            // Tọa độ chữ "love" nhỏ gọn nằm ngay chính giữa lòng Trái Tim
+                            const tx = ((x - offW / 2) / (offW / 2)) * 27 + (Math.random() - 0.5) * 0.45;
+                            const ty = HEART_CENTER_Y - 3.5 + ((y - offH / 2) / (offH / 2)) * 12.5 + (Math.random() - 0.5) * 0.45;
+                            // Đặt nhẹ về phía mặt trước tâm tim để chữ "love" luôn nổi bật giữa 8200 hạt
+                            const tz = -15 + (Math.random() - 0.5) * 3.5;
+
+                            const vortexRadius = Math.random() * 22 + 2.5;
+                            const vortexAngle = Math.random() * Math.PI * 2;
+
+                            heartLoveParticles.push({
+                                tx,
+                                ty,
+                                tz,
+                                vRadius: vortexRadius,
+                                vAngle: vortexAngle,
+                                vSpeed: (0.024 + (1 / (vortexRadius + 8)) * 0.35),
+                                vYOffset: (Math.random() - 0.5) * 1.6,
+                                delay: Math.random() * 0.32,
+                                size: Math.random() * 0.48 + 0.68,
+                                sparklePhase: Math.random() * Math.PI * 2,
+                                colorOffset: (Math.random() - 0.5) * 0.25
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Quét điểm ảnh chữ "LOVE" trên canvas ẩn để tạo các hạt li ti xếp thành chữ LOVE xoay tròn nhỏ gọn dưới đáy
+            function generateLoveWordParticles() {
+                loveRingParticles.length = 0;
+                const offCanvas = document.createElement('canvas');
+                const offW = 480;
+                const offH = 60;
+                offCanvas.width = offW;
+                offCanvas.height = offH;
+                const offCtx = offCanvas.getContext('2d');
+
+                offCtx.fillStyle = '#000';
+                offCtx.fillRect(0, 0, offW, offH);
+                offCtx.fillStyle = '#fff';
+                offCtx.font = 'bold 38px "Quicksand", sans-serif';
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
+                offCtx.fillText('♥ LOVE ♥ LOVE ♥ LOVE ♥', offW / 2, offH / 2);
+
+                const imgData = offCtx.getImageData(0, 0, offW, offH).data;
+                const step = 2;
+                for (let y = 0; y < offH; y += step) {
+                    for (let x = 0; x < offW; x += step) {
+                        const alpha = imgData[(y * offW + x) * 4];
+                        if (alpha > 140) {
+                            const angle = (x / offW) * Math.PI * 2;
+                            // Thu nhỏ bán kính vòng chữ LOVE xuống ~27.5 để vừa khít trục xoay nhỏ gọn dưới đáy tim
+                            const radialOffset = ((y - offH / 2) / (offH / 2)) * 4.8;
+                            loveRingParticles.push({
+                                baseAngle: angle,
+                                radius: 27.5 + radialOffset,
+                                yOffset: ((y - offH / 2) / (offH / 2)) * 1.3,
+                                size: Math.random() * 0.42 + 0.68,
+                                twinklePhase: Math.random() * Math.PI * 2
+                            });
+                        }
+                    }
+                }
+            }
+
+            function initParticles() {
+                ambientSkyParticles.length = 0;
+                fallingSnowParticles.length = 0;
+                heartParticles.length = 0;
+                heartLoveParticles.length = 0;
+                vortexParticles.length = 0;
+                suctionParticles.length = 0;
+                shootingStars.length = 0;
+                shootingSparks.length = 0;
+                fireworkParticles.length = 0;
+
+                // 1a. Khởi tạo 950 hạt li ti lơ lửng & lấp lánh khắp bầu trời đêm ngoài Trái Tim (Ambient Starfield)
+                for (let i = 0; i < 950; i++) {
+                    const randHue = Math.random();
+                    let starType = 'white';
+                    if (randHue > 0.65 && randHue <= 0.88) starType = 'love';
+                    else if (randHue > 0.88) starType = 'warm';
+
+                    ambientSkyParticles.push({
+                        x: (Math.random() - 0.5) * 1050,
+                        y: (Math.random() - 0.5) * 560,
+                        z: (Math.random() - 0.25) * 480,
+                        driftX: (Math.random() - 0.5) * 3.2,
+                        driftY: (Math.random() - 0.5) * 2.2,
+                        floatSpeed: Math.random() * 1.8 + 0.6,
+                        twinkleSpeed: Math.random() * 4.2 + 1.5,
+                        phase: Math.random() * Math.PI * 2,
+                        size: Math.random() * 1.05 + 0.35,
+                        colorOffset: Math.random() * 4,
+                        starType
+                    });
+                }
+
+                // 1b. Khởi tạo 520 hạt li ti rơi nhẹ trải rộng khắp khung hình ngang (Falling Stardust)
+                for (let i = 0; i < 520; i++) {
+                    fallingSnowParticles.push({
+                        x: (Math.random() - 0.5) * 1100,
+                        y: (Math.random() - 0.5) * 620,
+                        z: (Math.random() - 0.2) * 440,
+                        vy: Math.random() * 13 + 6,
+                        vx: (Math.random() - 0.5) * 5,
+                        swaySpeed: Math.random() * 2 + 0.8,
+                        swayPhase: Math.random() * Math.PI * 2,
+                        size: Math.random() * 0.95 + 0.38,
+                        colorOffset: Math.random() * 4,
+                        isWhite: Math.random() < 0.56
+                    });
+                }
+
+                // 2. Khởi tạo 8200 hạt li ti siêu mịn & dày đặc cho Trái Tim 3D đứng yên đầy đặn
+                const totalHeartParticles = 8200;
+                for (let i = 0; i < totalHeartParticles; i++) {
+                    const pt = sampleRoundPlumpHeart3D();
+                    // Bán kính xuất phát từ trục xoay dưới cũng thu gọn tương ứng (2.5 -> 38)
+                    const vortexRadius = Math.pow(Math.random(), 0.72) * VORTEX_MAX_RADIUS + 2.5;
+                    const vortexAngle = Math.random() * Math.PI * 2;
+
+                    heartParticles.push({
+                        tx: pt.x,
+                        ty: pt.y,
+                        tz: pt.z,
+                        isCore: pt.isCore,
+                        vRadius: vortexRadius,
+                        vAngle: vortexAngle,
+                        vSpeed: (0.020 + (1 / (vortexRadius + 10)) * 0.42) * (Math.random() * 0.3 + 0.85),
+                        vYOffset: (Math.random() - 0.5) * 2.0,
+                        delay: Math.random() * 0.42,
+                        size: Math.random() * 0.85 + 0.5,
+                        colorOffset: (Math.random() - 0.5) * 0.45,
+                        sparklePhase: Math.random() * Math.PI * 2
+                    });
+                }
+
+                // 2b. Khởi tạo các hạt li ti ghép thành chữ "love" nhỏ ở chính giữa Trái Tim
+                generateInnerHeartLoveParticles();
+
+                // 3. Khởi tạo 2200 hạt li ti cố định của Trục Đĩa Xoáy NHỎ GỌN xoay liên tục ở dưới đáy Trái Tim
+                const totalVortexParticles = 2200;
+                for (let i = 0; i < totalVortexParticles; i++) {
+                    const ringIndex = i % 9;
+                    // Bán kính trục xoay thu nhỏ còn khoảng 3.5 -> 38 (nhỏ gọn ngay dưới mũi tim)
+                    const baseRingR = 3.5 + ringIndex * 4.1 + (Math.random() - 0.5) * 2.2;
+                    vortexParticles.push({
+                        baseRadius: baseRingR,
+                        angle: Math.random() * Math.PI * 2,
+                        speed: 0.022 + (45 / (baseRingR + 10)) * 0.0085,
+                        yWavePhase: ringIndex * 0.8 + Math.random() * 0.6,
+                        size: Math.random() * 0.78 + 0.45,
+                        isWhiteCore: Math.random() < 0.42,
+                        colorOffset: (Math.random() - 0.5) * 0.6,
+                        suctionPhaseOffset: Math.random() * Math.PI * 2
+                    });
+                }
+
+                // 4. Tạo các hạt chữ "LOVE" xoay tròn trong đĩa xoáy nhỏ dưới đáy
+                generateLoveWordParticles();
+
+                // 5. Khởi tạo 500 hạt li ti ở trục xoay nhỏ dưới bị Trái Tim hút thẳng lên theo trục dọc và nhả ra
+                for (let i = 0; i < 500; i++) {
+                    const targetPt = sampleRoundPlumpHeart3D();
+                    suctionParticles.push({
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 1.45 + Math.random() * 0.8,
+                        angle: Math.random() * Math.PI * 2,
+                        spinSpeed: (Math.random() * 0.055 + 0.035) * (Math.random() < 0.5 ? 1 : -1),
+                        baseRadius: 4 + Math.random() * 32,
+                        heartTargetX: targetPt.x * 0.48,
+                        heartTargetY: targetPt.y * 0.5 + 12,
+                        heartTargetZ: targetPt.z * 0.48,
+                        size: Math.random() * 0.78 + 0.44,
+                        colorOffset: Math.random() * 0.8
+                    });
+                }
+            }
+
+            // Sinh Sao Băng (Shooting Star) NHỎ MẢNH & CHỈ MÀU TRẮNG TINH KHIẾT NHƯ NGOÀI ĐỜI THỰC
+            function spawnShootingStar() {
+                const fromLeft = Math.random() < 0.58;
+                // Xuất phát từ khoảng rộng của khung hình nằm ngang
+                const startX = fromLeft ? -(340 + Math.random() * 200) : (340 + Math.random() * 200);
+                const startY = -(180 + Math.random() * 110);
+                const startZ = (Math.random() - 0.5) * 80;
+
+                // Bay xuyên qua vùng không gian Trái Tim và bầu trời đêm
+                const passX = (Math.random() - 0.5) * 65;
+                const passY = HEART_CENTER_Y + (Math.random() - 0.5) * 45;
+                const passZ = (Math.random() - 0.5) * 30;
+
+                const dirX = passX - startX;
+                const dirY = passY - startY;
+                const dirZ = passZ - startZ;
+                const len = Math.hypot(dirX, dirY, dirZ) || 1;
+                const speed = 440 + Math.random() * 160;
+
+                shootingStars.push({
+                    x: startX,
+                    y: startY,
+                    z: startZ,
+                    vx: (dirX / len) * speed,
+                    vy: (dirY / len) * speed,
+                    vz: (dirZ / len) * speed,
+                    // Đuôi sao băng mảnh và nhỏ gọn như sao băng thật trên bầu trời đêm
+                    tailLength: 42 + Math.random() * 32,
+                    headRadius: 0.65 + Math.random() * 0.35,
+                    life: 0,
+                    maxLife: 1.25 + Math.random() * 0.35,
+                    hasTriggeredHeartBurst: false
+                });
+            }
+
+            // Sinh chùm hạt li ti nổ đẹp như Pháo Hoa (trong lòng Trái Tim hoặc ngoài bầu trời đêm)
+            function spawnFireworkBurst(insideHeart = false, customPos = null) {
+                let bx, by, bz;
+                if (customPos) {
+                    bx = customPos.x;
+                    by = customPos.y;
+                    bz = customPos.z;
+                } else if (insideHeart) {
+                    bx = (Math.random() - 0.5) * 42;
+                    by = HEART_CENTER_Y + (Math.random() - 0.5) * 38;
+                    bz = (Math.random() - 0.5) * 28;
+                } else {
+                    // Phân bố rộng ra hai bên khung hình nằm ngang
+                    const side = Math.random() < 0.5 ? -1 : 1;
+                    bx = side * (95 + Math.random() * 165);
+                    by = HEART_CENTER_Y + (Math.random() - 0.5) * 140;
+                    bz = (Math.random() - 0.5) * 100;
+                }
+
+                const count = insideHeart ? 48 : 62;
+                const baseColorOffset = Math.random() * 4;
+                const burstSpeed = insideHeart ? (25 + Math.random() * 22) : (34 + Math.random() * 32);
+
+                for (let i = 0; i < count; i++) {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    const spd = burstSpeed * (0.45 + Math.random() * 0.65);
+
+                    fireworkParticles.push({
+                        x: bx,
+                        y: by,
+                        z: bz,
+                        vx: Math.sin(phi) * Math.cos(theta) * spd,
+                        vy: Math.sin(phi) * Math.sin(theta) * spd,
+                        vz: Math.cos(phi) * spd,
+                        life: 0,
+                        maxLife: 0.92 + Math.random() * 0.6,
+                        size: Math.random() * 0.95 + 0.45,
+                        colorOffset: baseColorOffset + (Math.random() - 0.5) * 0.35,
+                        isWhiteSpark: Math.random() < 0.28
+                    });
+                }
+            }
+
+            function resizeCanvas() {
+                const rect = stageEl ? stageEl.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
+                // Nếu đang bật chế độ xoay ngang trên mobile thì lấy đúng kích thước nội bộ của stage
+                width = stageEl ? stageEl.clientWidth : rect.width;
+                height = stageEl ? stageEl.clientHeight : rect.height;
+                if (!width || !height) {
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                }
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            // Phép chiếu phối cảnh 3D sang màn hình 2D
+            function project3D(x, y, z, centerX, centerY, scaleFactor, customTiltX = 0.24) {
+                const cosY = Math.cos(HEART_ROTATION_Y);
+                const sinY = Math.sin(HEART_ROTATION_Y);
+                let rx = x * cosY - z * sinY;
+                let rz = z * cosY + x * sinY;
+
+                const cosX = Math.cos(customTiltX);
+                const sinX = Math.sin(customTiltX);
+                let ry = y * cosX - rz * sinX;
+                rz = rz * cosX + y * sinX;
+
+                const fov = 440;
+                const viewerDist = 380;
+                const perspective = fov / Math.max(70, viewerDist + rz);
+
+                return {
+                    sx: centerX + rx * perspective * scaleFactor,
+                    sy: centerY + ry * perspective * scaleFactor,
+                    scale: perspective * scaleFactor,
+                    depth: rz
+                };
+            }
+
+            function smoothstep(min, max, value) {
+                const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
+                return x * x * (3 - 2 * x);
+            }
+
+            let lastTime = performance.now();
+            let shootingStarTimer = 0;
+            let fireworkTimer = 0;
+
+            function renderLoop(now) {
+                if (!isRunning) return;
+                const dt = Math.min(0.05, (now - lastTime) / 1000);
+                lastTime = now;
+                const timeSec = now * 0.001;
+
+                // Làm mờ nền đen mượt mà
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+                ctx.fillRect(0, 0, width, height);
+
+                // Cập nhật bộ đếm chuyển màu Tình Yêu (Đỏ -> Hồng Nhạt -> Hồng Đậm -> Màu Son)
+                paletteTime += dt * window.GIFT_CONFIG.colorCycleSpeed;
+                const mainLoveColor = getLoveColorRGB(0);
+                const glowColorStr = `rgb(${mainLoveColor.r}, ${mainLoveColor.g}, ${mainLoveColor.b})`;
+                document.documentElement.style.setProperty('--glow-color', glowColorStr);
+
+                // Tiến trình biến hình từ Vòng Xoáy (0) sang Trái Tim 3D (1)
+                const targetTrans = isHeartFormed ? 1 : 0;
+                heartTransition += (targetTrans - heartTransition) * Math.min(1, dt * 2.3);
+
+                // -----------------------------------------------------------------
+                // NHỊP ĐẬP TRÁI TIM ĐỨNG YÊN (CO GIÃN TO - NHỎ) & NHỊP HÚT/NHẢ HẠT
+                // -----------------------------------------------------------------
+                const lub = Math.pow(Math.max(0, Math.sin(timeSec * 3.4)), 4);
+                const dub = Math.pow(Math.max(0, Math.sin(timeSec * 3.4 - 0.55)), 6) * 0.55;
+                const breathScale = Math.sin(timeSec * 1.7) * 0.055;
+                const heartPulseScale = 1 + (lub * 0.13 + dub * 0.075 + breathScale) * heartTransition;
+                // Nhịp nhún nhẹ theo phương dọc cho cả Trái Tim và chữ "love" bên trong
+                const heartFloatY = Math.sin(timeSec * 2.1) * 1.6 * heartTransition;
+
+                // Chu kỳ Hút vào (+1) và Nhả ra (-1) của đĩa xoáy bên dưới
+                const suctionCycle = Math.sin(timeSec * 2.2);
+
+                // Đặt khối Trái Tim + Trục xoay dọc ở chính giữa khung hình ngang với kích thước lớn nổi bật
+                const centerX = width * 0.5;
+                const centerY = height * 0.52;
+                const baseScale = (Math.min(width, height) / 290) * SCENE_COMPACT_SCALE;
+
+                // -----------------------------------------------------------------
+                // 1A. VẼ 950 HẠT LI TI LẤP LÁNH LƠ LỬNG NGOÀI BẦU TRỜI ĐÊM (SKY STARFIELD)
+                // -----------------------------------------------------------------
+                for (let i = 0; i < ambientSkyParticles.length; i++) {
+                    const ap = ambientSkyParticles[i];
+                    ap.x += ap.driftX * dt;
+                    ap.y += (ap.driftY + Math.sin(timeSec * ap.floatSpeed + ap.phase) * 1.5) * dt;
+
+                    if (ap.x > 525) ap.x = -525;
+                    else if (ap.x < -525) ap.x = 525;
+                    if (ap.y > 280) ap.y = -280;
+                    else if (ap.y < -280) ap.y = 280;
+
+                    const proj = project3D(ap.x, ap.y, ap.z, centerX, centerY, baseScale, 0.10);
+                    if (proj.sx < -10 || proj.sx > width + 10 || proj.sy < -10 || proj.sy > height + 10) continue;
+
+                    const pSize = Math.max(0.42, ap.size * proj.scale);
+                    const twinkle = 0.25 + 0.75 * Math.pow(0.5 + 0.5 * Math.sin(timeSec * ap.twinkleSpeed + ap.phase), 2);
+
+                    if (ap.starType === 'white') {
+                        ctx.fillStyle = `rgba(255, 255, 255, ${(twinkle * 0.82).toFixed(2)})`;
+                    } else if (ap.starType === 'warm') {
+                        ctx.fillStyle = `rgba(255, 232, 210, ${(twinkle * 0.78).toFixed(2)})`;
+                    } else {
+                        const col = getLoveColorRGB(ap.colorOffset);
+                        ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${(twinkle * 0.72).toFixed(2)})`;
+                    }
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 1B. VẼ 520 HẠT LI TI RƠI NHẸ NGOÀI KHUNG CẢNH ĐÊM (FALLING STARDUST)
+                // -----------------------------------------------------------------
+                for (let i = 0; i < fallingSnowParticles.length; i++) {
+                    const sp = fallingSnowParticles[i];
+                    sp.y += sp.vy * dt;
+                    sp.x += (sp.vx + Math.sin(timeSec * sp.swaySpeed + sp.swayPhase) * 5) * dt;
+
+                    if (sp.y > 310) {
+                        sp.y = -310;
+                        sp.x = (Math.random() - 0.5) * 1100;
+                    }
+
+                    const proj = project3D(sp.x, sp.y, sp.z, centerX, centerY, baseScale, 0.12);
+                    if (proj.sx < -20 || proj.sx > width + 20 || proj.sy < -20 || proj.sy > height + 20) continue;
+
+                    const pSize = Math.max(0.45, sp.size * proj.scale);
+                    const twinkle = 0.42 + 0.58 * Math.sin(timeSec * 3.2 + sp.swayPhase);
+
+                    if (sp.isWhite) {
+                        ctx.fillStyle = `rgba(255, 255, 255, ${(twinkle * 0.72).toFixed(2)})`;
+                    } else {
+                        const col = getLoveColorRGB(sp.colorOffset);
+                        ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${(twinkle * 0.65).toFixed(2)})`;
+                    }
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 2. VẼ TRỤC XOAY ĐĨA HẠT ĐỒNG TÂM NHỎ GỌN Ở PHÍA DƯỚI (LUÔN HIỂN THỊ 100%)
+                //    Có chuyển động co giãn như bị Trái Tim hút vào tâm và nhả ra
+                // -----------------------------------------------------------------
+                for (let i = 0; i < vortexParticles.length; i++) {
+                    const vp = vortexParticles[i];
+                    vp.angle += vp.speed;
+
+                    // Hiệu ứng hạt ở đĩa dưới co vào tâm trục rồi giãn ra theo nhịp hút của Trái Tim
+                    const radialBreath = 1 - 0.16 * suctionCycle * Math.sin(vp.suctionPhaseOffset + timeSec * 1.8) * heartTransition;
+                    const curR = Math.max(2.2, vp.baseRadius * radialBreath);
+
+                    // Khi bị hút vào gần tâm trục, các hạt nhô nhẹ lên hướng về mũi Trái Tim
+                    const centerPullLift = Math.max(0, (1 - curR / VORTEX_MAX_RADIUS)) * (7.0 * Math.max(0, suctionCycle) * heartTransition);
+                    const waveY = Math.sin(timeSec * 3.0 + vp.yWavePhase) * 0.95;
+
+                    const vx = Math.cos(vp.angle) * curR;
+                    const vz = Math.sin(vp.angle) * curR;
+                    const vy = VORTEX_BASE_Y + waveY - centerPullLift;
+
+                    // Giữ góc nghiêng 0.30 để đĩa xoay dưới luôn nhìn rõ mặt elip 3D nhỏ gọn dưới đáy tim
+                    const proj = project3D(vx, vy, vz, centerX, centerY, baseScale, 0.30);
+                    const pSize = Math.max(0.54, vp.size * proj.scale);
+
+                    if (vp.isWhiteCore) {
+                        ctx.fillStyle = 'rgba(255, 242, 248, 0.88)';
+                    } else {
+                        const col = getLoveColorRGB(vp.colorOffset);
+                        ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, 0.85)`;
+                    }
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 3. VẼ VÒNG CHỮ "♥ LOVE ♥" BẰNG HẠT LI TI XOAY TRÒN TRONG TRỤC DƯỚI
+                // -----------------------------------------------------------------
+                const loveSpinAngle = -timeSec * 0.72;
+                for (let i = 0; i < loveRingParticles.length; i++) {
+                    const lrp = loveRingParticles[i];
+                    const curAngle = lrp.baseAngle + loveSpinAngle;
+
+                    const ringBreath = 1 - 0.08 * suctionCycle * heartTransition;
+                    const r = lrp.radius * ringBreath;
+
+                    const lx = Math.cos(curAngle) * r;
+                    const lz = Math.sin(curAngle) * r;
+                    const ly = VORTEX_BASE_Y + lrp.yOffset;
+
+                    const proj = project3D(lx, ly, lz, centerX, centerY, baseScale, 0.30);
+                    const pSize = Math.max(0.60, lrp.size * proj.scale);
+                    const twinkle = 0.78 + 0.22 * Math.sin(timeSec * 5.0 + lrp.twinklePhase);
+
+                    const col = getLoveColorRGB(0.25);
+                    const mixR = Math.min(255, Math.round(col.r * 0.45 + 255 * 0.55));
+                    const mixG = Math.min(255, Math.round(col.g * 0.40 + 235 * 0.60));
+                    const mixB = Math.min(255, Math.round(col.b * 0.45 + 245 * 0.55));
+
+                    ctx.fillStyle = `rgba(${mixR}, ${mixG}, ${mixB}, ${(twinkle * 0.94).toFixed(2)})`;
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 4. VẼ LUỒNG HẠT XOẮN ỐC BỊ TRÁI TIM HÚT LÊN & NHẢ XUỐNG TRỤC XOAY NHỎ
+                // -----------------------------------------------------------------
+                if (heartTransition > 0.05) {
+                    for (let i = 0; i < suctionParticles.length; i++) {
+                        const sp = suctionParticles[i];
+                        sp.angle += sp.spinSpeed;
+
+                        // wave chạy từ 0 (ở đĩa xoay dưới) -> 1 (hút vào trong mũi & tâm Trái Tim) -> 0 (nhả lại đĩa dưới)
+                        const wave = 0.5 + 0.5 * Math.sin(timeSec * sp.speed + sp.phase);
+                        const activeWave = wave * heartTransition;
+
+                        // Khi hút lên gần mũi tim, bán kính xoắn thu hẹp lại tạo thành phễu ánh sáng nối Trục và Tim
+                        const funnelFactor = Math.sin(activeWave * Math.PI);
+                        const curRadius = sp.baseRadius * (1 - activeWave * 0.78) + funnelFactor * 3.8;
+
+                        const sxDisk = Math.cos(sp.angle) * curRadius;
+                        const szDisk = Math.sin(sp.angle) * curRadius;
+                        const syDisk = VORTEX_BASE_Y;
+
+                        const txHeart = sp.heartTargetX * heartPulseScale;
+                        const tyHeart = sp.heartTargetY + heartFloatY;
+                        const tzHeart = sp.heartTargetZ * heartPulseScale;
+
+                        const curX = sxDisk + (txHeart - sxDisk) * activeWave;
+                        const curY = syDisk + (tyHeart - syDisk) * activeWave;
+                        const curZ = szDisk + (tzHeart - szDisk) * activeWave;
+
+                        const tilt = 0.30 * (1 - activeWave) + 0.08 * activeWave;
+                        const proj = project3D(curX, curY, curZ, centerX, centerY, baseScale, tilt);
+                        const pSize = Math.max(0.55, sp.size * proj.scale);
+
+                        const col = getLoveColorRGB(sp.colorOffset);
+                        const alpha = (0.38 + 0.52 * funnelFactor) * heartTransition;
+                        ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${alpha.toFixed(2)})`;
+                        ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                    }
+                }
+
+                // -----------------------------------------------------------------
+                // 5. VẼ KHỐI TRÁI TIM 3D (8200 HẠT) ĐỨNG YÊN THEO TRỤC DỌC, TO ĐẦY ĐẶN
+                // -----------------------------------------------------------------
+                for (let i = 0; i < heartParticles.length; i++) {
+                    const hp = heartParticles[i];
+                    hp.vAngle += hp.vSpeed;
+
+                    const vx = Math.cos(hp.vAngle) * hp.vRadius;
+                    const vz = Math.sin(hp.vAngle) * hp.vRadius;
+                    const vy = VORTEX_BASE_Y + hp.vYOffset;
+
+                    const localT = smoothstep(hp.delay * 0.52, 1.0, heartTransition);
+
+                    const targetX = hp.tx * heartPulseScale;
+                    const targetY = HEART_CENTER_Y + (hp.ty - HEART_CENTER_Y) * heartPulseScale + heartFloatY;
+                    const targetZ = hp.tz * heartPulseScale;
+
+                    let curX, curY, curZ;
+                    let tiltAngle;
+                    if (localT <= 0.001) {
+                        curX = vx;
+                        curY = vy;
+                        curZ = vz;
+                        tiltAngle = 0.26;
+                    } else if (localT >= 0.999) {
+                        curX = targetX;
+                        curY = targetY;
+                        curZ = targetZ;
+                        tiltAngle = 0.06;
+                    } else {
+                        const spiralTwist = (1 - localT) * 3.6;
+                        const cosS = Math.cos(spiralTwist);
+                        const sinS = Math.sin(spiralTwist);
+                        const twistedTx = targetX * cosS - targetZ * sinS;
+                        const twistedTz = targetZ * cosS + targetX * sinS;
+
+                        curX = vx + (twistedTx - vx) * localT;
+                        curY = vy + (targetY - vy) * localT;
+                        curZ = vz + (twistedTz - vz) * localT;
+                        tiltAngle = 0.26 * (1 - localT) + 0.06 * localT;
+                    }
+
+                    const proj = project3D(curX, curY, curZ, centerX, centerY, baseScale, tiltAngle);
+                    const pSize = Math.max(0.55, hp.size * proj.scale);
+
+                    const col = getLoveColorRGB(hp.colorOffset);
+                    const sparkle = 0.74 + 0.26 * Math.sin(timeSec * 5.0 + hp.sparklePhase);
+                    const alpha = (0.45 + localT * 0.48) * sparkle;
+
+                    if (hp.isCore && sparkle > 0.92) {
+                        ctx.fillStyle = `rgba(255, 225, 236, ${alpha.toFixed(2)})`;
+                    } else {
+                        ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${alpha.toFixed(2)})`;
+                    }
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 5b. VẼ CÁC HẠT LI TI GHÉP THÀNH CHỮ "love" NHỎ Ở GIỮA TRÁI TIM
+                //     Chuyển động đập to nhỏ và nhún nhịp nhàng 100% cùng với Trái Tim
+                // -----------------------------------------------------------------
+                for (let i = 0; i < heartLoveParticles.length; i++) {
+                    const lp = heartLoveParticles[i];
+                    lp.vAngle += lp.vSpeed;
+
+                    const vx = Math.cos(lp.vAngle) * lp.vRadius;
+                    const vz = Math.sin(lp.vAngle) * lp.vRadius;
+                    const vy = VORTEX_BASE_Y + lp.vYOffset;
+
+                    const localT = smoothstep(lp.delay * 0.45, 0.96, heartTransition);
+
+                    // Co giãn to-nhỏ và nhún theo đúng tâm Trái Tim (HEART_CENTER_Y)
+                    const targetX = lp.tx * heartPulseScale;
+                    const targetY = HEART_CENTER_Y + (lp.ty - HEART_CENTER_Y) * heartPulseScale + heartFloatY;
+                    const targetZ = lp.tz * heartPulseScale;
+
+                    let curX, curY, curZ;
+                    let tiltAngle;
+                    if (localT <= 0.001) {
+                        curX = vx;
+                        curY = vy;
+                        curZ = vz;
+                        tiltAngle = 0.26;
+                    } else if (localT >= 0.999) {
+                        curX = targetX;
+                        curY = targetY;
+                        curZ = targetZ;
+                        tiltAngle = 0.06;
+                    } else {
+                        const spiralTwist = (1 - localT) * 2.8;
+                        const cosS = Math.cos(spiralTwist);
+                        const sinS = Math.sin(spiralTwist);
+                        const twistedTx = targetX * cosS - targetZ * sinS;
+                        const twistedTz = targetZ * cosS + targetX * sinS;
+
+                        curX = vx + (twistedTx - vx) * localT;
+                        curY = vy + (targetY - vy) * localT;
+                        curZ = vz + (twistedTz - vz) * localT;
+                        tiltAngle = 0.26 * (1 - localT) + 0.06 * localT;
+                    }
+
+                    const proj = project3D(curX, curY, curZ, centerX, centerY, baseScale, tiltAngle);
+                    const pSize = Math.max(0.65, lp.size * proj.scale);
+
+                    // Pha màu hồng ngọc trai phát sáng để chữ "love" nổi bật rõ nét ngay giữa lòng Trái Tim
+                    const col = getLoveColorRGB(lp.colorOffset);
+                    const pearlR = Math.min(255, Math.round(col.r * 0.32 + 255 * 0.68));
+                    const pearlG = Math.min(255, Math.round(col.g * 0.28 + 238 * 0.72));
+                    const pearlB = Math.min(255, Math.round(col.b * 0.32 + 246 * 0.68));
+                    const sparkle = 0.82 + 0.18 * Math.sin(timeSec * 6.0 + lp.sparklePhase);
+                    const alpha = (0.35 + localT * 0.65) * sparkle;
+
+                    ctx.fillStyle = `rgba(${pearlR}, ${pearlG}, ${pearlB}, ${alpha.toFixed(2)})`;
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 6. VẼ PHÁO HOA HẠT LI TI NỔ TRONG VÀ NGOÀI TRÁI TIM
+                // -----------------------------------------------------------------
+                fireworkTimer += dt;
+                if (heartTransition > 0.5 && fireworkTimer > 0.65) {
+                    fireworkTimer = 0;
+                    spawnFireworkBurst(Math.random() < 0.55);
+                }
+
+                for (let i = fireworkParticles.length - 1; i >= 0; i--) {
+                    const fw = fireworkParticles[i];
+                    fw.life += dt;
+                    if (fw.life >= fw.maxLife) {
+                        fireworkParticles.splice(i, 1);
+                        continue;
+                    }
+
+                    fw.vx *= 0.975;
+                    fw.vy *= 0.975;
+                    fw.vz *= 0.975;
+                    fw.vy += 15 * dt;
+
+                    fw.x += fw.vx * dt;
+                    fw.y += fw.vy * dt;
+                    fw.z += fw.vz * dt;
+
+                    const proj = project3D(fw.x, fw.y, fw.z, centerX, centerY, baseScale, 0.12);
+                    const lifeRatio = 1 - fw.life / fw.maxLife;
+                    const pSize = Math.max(0.52, fw.size * proj.scale * (0.6 + 0.6 * lifeRatio));
+
+                    if (fw.isWhiteSpark) {
+                        ctx.fillStyle = `rgba(255, 255, 255, ${(lifeRatio * 0.95).toFixed(2)})`;
+                    } else {
+                        const col = getLoveColorRGB(fw.colorOffset);
+                        ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${(lifeRatio * 0.92).toFixed(2)})`;
+                    }
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                // -----------------------------------------------------------------
+                // 7. VẼ SAO BĂNG NHỎ MẢNH & CHỈ MÀU TRẮNG TINH KHIẾT NHƯ NGOÀI THỰC TẾ
+                // -----------------------------------------------------------------
+                shootingStarTimer += dt;
+                if (heartTransition > 0.35 && shootingStarTimer > 1.45) {
+                    shootingStarTimer = 0;
+                    spawnShootingStar();
+                }
+
+                for (let i = shootingStars.length - 1; i >= 0; i--) {
+                    const st = shootingStars[i];
+                    st.life += dt;
+                    if (st.life >= st.maxLife) {
+                        shootingStars.splice(i, 1);
+                        continue;
+                    }
+
+                    st.x += st.vx * dt;
+                    st.y += st.vy * dt;
+                    st.z += st.vz * dt;
+
+                    const distToHeart = Math.hypot(st.x, st.y - HEART_CENTER_Y, st.z);
+                    if (!st.hasTriggeredHeartBurst && distToHeart < 30 && heartTransition > 0.6) {
+                        st.hasTriggeredHeartBurst = true;
+                        spawnFireworkBurst(true, { x: st.x, y: st.y, z: st.z });
+                    }
+
+                    // Hạt bụi sao nhỏ li ti màu trắng tinh khiết phía sau sao băng
+                    if (Math.random() < 0.65) {
+                        shootingSparks.push({
+                            x: st.x + (Math.random() - 0.5) * 2.5,
+                            y: st.y + (Math.random() - 0.5) * 2.5,
+                            z: st.z + (Math.random() - 0.5) * 2.5,
+                            vx: (Math.random() - 0.5) * 10,
+                            vy: (Math.random() - 0.5) * 10 + 4,
+                            life: 0,
+                            maxLife: 0.32 + Math.random() * 0.25,
+                            size: Math.random() * 0.55 + 0.3
+                        });
+                    }
+
+                    const speedLen = Math.hypot(st.vx, st.vy, st.vz) || 1;
+                    const tailX = st.x - (st.vx / speedLen) * st.tailLength;
+                    const tailY = st.y - (st.vy / speedLen) * st.tailLength;
+                    const tailZ = st.z - (st.vz / speedLen) * st.tailLength;
+
+                    const headProj = project3D(st.x, st.y, st.z, centerX, centerY, baseScale, 0.12);
+                    const tailProj = project3D(tailX, tailY, tailZ, centerX, centerY, baseScale, 0.12);
+
+                    // Chỉ sử dụng 100% màu trắng thực tế của sao băng trên bầu trời đêm
+                    const fadeAlpha = Math.sin((st.life / st.maxLife) * Math.PI);
+                    const grad = ctx.createLinearGradient(headProj.sx, headProj.sy, tailProj.sx, tailProj.sy);
+                    grad.addColorStop(0, `rgba(255, 255, 255, ${fadeAlpha.toFixed(2)})`);
+                    grad.addColorStop(0.35, `rgba(255, 255, 255, ${(fadeAlpha * 0.48).toFixed(2)})`);
+                    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                    ctx.save();
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = Math.max(0.55, 0.95 * headProj.scale);
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(headProj.sx, headProj.sy);
+                    ctx.lineTo(tailProj.sx, tailProj.sy);
+                    ctx.stroke();
+
+                    // Đầu sao băng nhỏ gọn, trắng sáng tinh khiết
+                    ctx.fillStyle = `rgba(255, 255, 255, ${fadeAlpha.toFixed(2)})`;
+                    ctx.beginPath();
+                    ctx.arc(headProj.sx, headProj.sy, Math.max(0.65, st.headRadius * headProj.scale), 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                for (let i = shootingSparks.length - 1; i >= 0; i--) {
+                    const spk = shootingSparks[i];
+                    spk.life += dt;
+                    if (spk.life >= spk.maxLife) {
+                        shootingSparks.splice(i, 1);
+                        continue;
+                    }
+                    spk.x += spk.vx * dt;
+                    spk.y += spk.vy * dt;
+                    const proj = project3D(spk.x, spk.y, spk.z, centerX, centerY, baseScale, 0.12);
+                    const alpha = 1 - spk.life / spk.maxLife;
+                    const pSize = Math.max(0.45, spk.size * proj.scale);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${(alpha * 0.78).toFixed(2)})`;
+                    ctx.fillRect(proj.sx - pSize * 0.5, proj.sy - pSize * 0.5, pSize, pSize);
+                }
+
+                requestAnimationFrame(renderLoop);
+            }
+
+            // Chuyển đổi trạng thái Vòng Xoáy <-> Trái Tim 3D khi chạm vào màn hình
+            function setHeartFormed(state) {
+                isHeartFormed = state;
+                if (isHeartFormed) {
+                    vortexHintPill.classList.add('hidden-hint');
+                    setTimeout(() => {
+                        if (isHeartFormed) {
+                            spawnShootingStar();
+                            spawnFireworkBurst(true);
+                            spawnFireworkBurst(false);
+                        }
+                    }, 450);
+                } else {
+                    vortexHintPill.classList.remove('hidden-hint');
+                }
+            }
+
+            function start() {
+                if (!isRunning) {
+                    resizeCanvas();
+                    initParticles();
+                    isRunning = true;
+                    lastTime = performance.now();
+                    requestAnimationFrame(renderLoop);
+                } else {
+                    resizeCanvas();
+                }
+            }
+
+            function initEvents() {
+                window.addEventListener('resize', resizeCanvas);
+
+                canvas.addEventListener('pointerdown', () => {
+                    AudioLyricsModule.unlockAudioOnInteraction();
+                    setHeartFormed(!isHeartFormed);
+                });
+            }
+
+            initEvents();
+
+            return { start, setHeartFormed, resizeCanvas };
+        })();
+    </script>
+
+
+    <!-- =========================================================================
+         [BỘ ĐIỀU KHIỂN CHUNG]: KẾT NỐI 5 FILE NHỎ & TRÌNH SỬA QUÀ TẶNG TRỰC TIẾP
+    ========================================================================== -->
+    <script id="file-app-controller-js">
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. Khởi tạo phân cảnh Bó Hoa & Mã QR
+            BouquetQRModule.init();
+
+            // 2. KHỞI CHẠY NGAY LẬP TỨC NHẠC & LỜI BÀI HÁT Ở DƯỚI CÙNG TỪ MÀN HÌNH BÓ HOA
+            AudioLyricsModule.startImmediatelyOnScene1();
+
+            // 3. Nút bật/tắt chế độ đổi màu hạt tự động & Nút xoay ngang khung hình
+            const btnColorMode = document.getElementById('btn-color-mode');
+            const colorModeLabel = document.getElementById('color-mode-label');
+            btnColorMode.addEventListener('click', () => {
+                window.GIFT_CONFIG.autoColorCycle = !window.GIFT_CONFIG.autoColorCycle;
+                colorModeLabel.textContent = window.GIFT_CONFIG.autoColorCycle
+                    ? 'Đổi màu: Tự động'
+                    : 'Đổi màu: Hồng gốc';
+            });
+
+            const btnRotateFrame = document.getElementById('btn-rotate-frame');
+            const widescreenStage = document.getElementById('widescreen-stage');
+            btnRotateFrame.addEventListener('click', () => {
+                widescreenStage.classList.toggle('force-landscape-mobile');
+                setTimeout(() => {
+                    ParticleHeart3DEngine.resizeCanvas();
+                }, 60);
+            });
+
+            // 4. Khởi tạo Trình Quản Lý Sửa Quà & 5 File Nhỏ
+            const codeModal = document.getElementById('code-manager-modal');
+            const btnOpenEditor = document.getElementById('btn-open-editor');
+            const btnCloseCodeModal = document.getElementById('close-code-modal');
+            const textareaLyrics = document.getElementById('textarea-lyrics');
+            const selectPresetSong = document.getElementById('select-preset-song');
+            const inputBouquetTitle = document.getElementById('input-bouquet-title');
+            const inputTrimSeconds = document.getElementById('input-trim-seconds');
+            const inputQrUrl = document.getElementById('input-qr-url');
+
+            function populateLyricsTextarea() {
+                const track = window.GIFT_CONFIG.tracks[window.GIFT_CONFIG.activeTrackKey];
+                textareaLyrics.value = track.lyrics
+                    .map(item => `${item.time} | ${item.main} | ${item.sub || ''}`)
+                    .join('\n');
+            }
+
+            populateLyricsTextarea();
+
+            btnOpenEditor.addEventListener('click', () => {
+                populateLyricsTextarea();
+                codeModal.classList.remove('hidden');
+                codeModal.classList.add('flex');
+            });
+
+            btnCloseCodeModal.addEventListener('click', () => {
+                codeModal.classList.add('hidden');
+                codeModal.classList.remove('flex');
+            });
+
+            // Chuyển đổi giữa các Tab trong trình quản lý
+            document.querySelectorAll('.subfile-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.subfile-tab').forEach(b => {
+                        b.className = 'subfile-tab px-3.5 py-2 rounded-t-xl text-zinc-400 hover:text-white whitespace-nowrap';
+                    });
+                    btn.className = 'subfile-tab px-3.5 py-2 rounded-t-xl bg-pink-500/20 text-pink-300 border-b-2 border-pink-400 whitespace-nowrap';
+
+                    document.getElementById('tab-quick').classList.add('hidden');
+                    document.getElementById('tab-architecture').classList.add('hidden');
+                    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+                });
+            });
+
+            // Đổi bài hát mẫu (Bản 1: Đáng Yêu 17.5s đã cắt 2s cuối / Bản 2: Một Giây Thôi Đừng Trôi)
+            selectPresetSong.addEventListener('change', (e) => {
+                window.GIFT_CONFIG.activeTrackKey = e.target.value;
+                populateLyricsTextarea();
+                AudioLyricsModule.restartTrack();
+            });
+
+            // Chọn file .mp3 trực tiếp từ máy (qua nút trên thanh công cụ hoặc trong hộp thoại)
+            const mp3FileInput = document.getElementById('mp3-file-input');
+            document.getElementById('btn-upload-mp3').addEventListener('click', () => {
+                mp3FileInput.click();
+            });
+            document.getElementById('btn-quick-mp3').addEventListener('click', () => {
+                mp3FileInput.click();
+            });
+            mp3FileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    AudioLyricsModule.loadUserMp3File(e.target.files[0]);
+                }
+            });
+
+            // Tải về file index.html đã nhúng sẵn MP3 gốc (đã cắt 2 giây cuối) bên trong code
+            document.getElementById('btn-download-embedded').addEventListener('click', () => {
+                AudioLyricsModule.downloadHtmlWithEmbeddedMp3();
+            });
+            document.getElementById('btn-export-embedded-modal').addEventListener('click', () => {
+                AudioLyricsModule.downloadHtmlWithEmbeddedMp3();
+            });
+
+            // Lưu cấu hình sửa nhanh
+            document.getElementById('btn-save-config').addEventListener('click', () => {
+                // Cập nhật tiêu đề dưới bó hoa
+                const newTitle = inputBouquetTitle.value.trim() || 'Chạm vào bó hoa';
+                window.GIFT_CONFIG.bouquetTitle = newTitle;
+                document.getElementById('touch-text-trigger').textContent = newTitle;
+
+                // Cập nhật số giây cắt ở cuối file MP3
+                window.GIFT_CONFIG.trimEndSeconds = parseFloat(inputTrimSeconds.value) || 2.0;
+
+                // Cập nhật link QR
+                window.GIFT_CONFIG.customQrUrl = inputQrUrl.value.trim();
+                BouquetQRModule.renderQRCode();
+
+                // Cập nhật lời bài hát theo giây
+                const lines = textareaLyrics.value.split('\n').map(l => l.trim()).filter(Boolean);
+                const parsedLyrics = [];
+                lines.forEach(line => {
+                    const parts = line.split('|').map(p => p.trim());
+                    if (parts.length >= 2) {
+                        parsedLyrics.push({
+                            time: parseFloat(parts[0]) || 0,
+                            main: parts[1],
+                            sub: parts[2] || ''
+                        });
+                    }
+                });
+
+                if (parsedLyrics.length > 0) {
+                    window.GIFT_CONFIG.tracks[window.GIFT_CONFIG.activeTrackKey].lyrics = parsedLyrics;
+                }
+
+                AudioLyricsModule.restartTrack();
+                codeModal.classList.add('hidden');
+                codeModal.classList.remove('flex');
+            });
+        });
+    </script>
+</body>
+</html>
